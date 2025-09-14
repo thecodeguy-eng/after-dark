@@ -1,0 +1,1727 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}{{ movie.title }} - BangXXX{% endblock %}
+
+{% load movie_extras %}
+
+{% block meta_description %}Watch {{ movie.title }} on BangXXX. {{ movie.excerpt|truncatewords:20|default:"Premium adult entertainment content." }}{% endblock %}
+
+{% block content %}
+<div class="movie-detail-container">
+    <!-- Movie Hero Section -->
+    <section class="movie-hero">
+        <div class="hero-background">
+            {% if movie.image_url %}
+            <img src="{{ movie.image_url }}" alt="{{ movie.title }}" class="hero-bg-image">
+            {% endif %}
+            <div class="hero-overlay"></div>
+        </div>
+        
+        <div class="container">
+            <div class="hero-content">
+                <!-- Movie Poster -->
+                <div class="movie-poster-section">
+                    <div class="poster-wrapper">
+                        <img src="{{ movie.image_url|default:'/static/images/default-poster.jpg' }}" 
+                             alt="{{ movie.title }}" class="movie-poster-large">
+                        <div class="poster-play-overlay">
+                            <button class="hero-play-btn" onclick="scrollToPlayer()" aria-label="Watch {{ movie.title }}">
+                                <i class="fas fa-play"></i>
+                                <span>Watch Now</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Movie Information -->
+                <div class="movie-info-section">
+                    <div class="movie-header">
+                        <h1 class="movie-title">{{ movie.title }}</h1>
+                        
+                        <!-- Movie Meta -->
+                        <div class="movie-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ movie.date|date:"F d, Y" }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-eye"></i>
+                                <span>{{ movie.view_count|default:0|floatformat:0 }} views</span>
+                            </div>
+                            {% if movie.video_sources %}
+                            <div class="meta-item">
+                                <i class="fas fa-video"></i>
+                                <span>{{ movie.video_sources|length }} source{{ movie.video_sources|length|pluralize }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="meta-item">
+                                <i class="fas fa-star"></i>
+                                <span>{{ movie.view_count|calc_rating }}/5</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Categories -->
+                        {% if movie.categories.all %}
+                        <div class="movie-categories">
+                            {% for category in movie.categories.all %}
+                            <a href="{% url 'movies:category' category.slug %}" class="category-badge">
+                                {{ category.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Description -->
+                        {% if movie.excerpt %}
+                        <div class="movie-description">
+                            <p>{{ movie.excerpt|safe|truncatewords:50 }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            {% if movie.video_sources %}
+                            <button class="btn-watch" onclick="scrollToPlayer()">
+                                <i class="fas fa-play"></i>
+                                Watch Now
+                            </button>
+                            {% endif %}
+                            
+                            {% if movie.download_links %}
+                            <button class="btn-download" onclick="toggleDownloads()">
+                                <i class="fas fa-download"></i>
+                                Download
+                            </button>
+                            {% endif %}
+                            
+                            <button class="btn-favorite" onclick="toggleFavorite({{ movie.id }})">
+                                <i class="far fa-heart"></i>
+                                Favorite
+                            </button>
+                            
+                            <button class="btn-share" onclick="showShareModal()">
+                                <i class="fas fa-share-alt"></i>
+                                Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Player Section -->
+    {% if movie.video_sources %}
+    <section class="video-player-section" id="video-player">
+        <div class="container">
+            <div class="player-container">
+                <div class="player-header">
+                    <h2 class="player-title">{{ movie.title }}</h2>
+                    <div class="player-controls">
+                        {% if movie.video_sources|length > 1 %}
+                        <div class="source-selector">
+                            <label for="source-select" class="sr-only">Select video source</label>
+                            <select id="source-select" onchange="changeVideoSource()">
+                                {% for source in movie.video_sources %}
+                                <option value="{{ forloop.counter0 }}" data-url="{{ source.url }}" data-type="{{ source.type|default:'video/mp4' }}">
+                                    {{ source.label|default:"Source "|add:forloop.counter }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        <button class="fullscreen-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="video-wrapper" id="video-wrapper">
+                    <div class="video-loading" id="video-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading video...</p>
+                    </div>
+                    
+                    <!-- Video Player -->
+                    {% with source=movie.video_sources.0 %}
+                    {% if 'iframe' in source.type|default:'' or 'embed' in source.url %}
+                    <iframe id="video-frame" 
+                            src="{{ source.url }}" 
+                            frameborder="0" 
+                            allowfullscreen
+                            allow="autoplay; fullscreen"
+                            style="display: none;">
+                    </iframe>
+                    {% else %}
+                    <video id="video-player-element" 
+                           controls 
+                           preload="metadata"
+                           style="display: none;">
+                        <source src="{{ source.url }}" type="{{ source.type|default:'video/mp4' }}">
+                        Your browser does not support the video tag.
+                    </video>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+                
+                <div class="player-footer">
+                    <div class="now-playing">
+                        <h3>{{ movie.title }}</h3>
+                        <p class="video-info">Quality: HD | Status: Ready to play</p>
+                    </div>
+                    <div class="player-stats">
+                        <span>{{ movie.view_count|default:0|floatformat:0 }} views</span>
+                        <span class="separator">•</span>
+                        <span>{{ movie.date|date:"M d, Y" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Download Section -->
+    {% if movie.download_links %}
+    <section class="download-section" id="download-section" style="display: none;">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="fas fa-download"></i>
+                Download Links
+            </h2>
+            <div class="download-grid">
+                {% for link in movie.download_links %}
+                <div class="download-card">
+                    <div class="download-icon">
+                        <i class="fas fa-file-video"></i>
+                    </div>
+                    <div class="download-info">
+                        <h4>{{ link.label|default:"Download Link" }}</h4>
+                        <p class="download-meta">
+                            {% if link.size %}{{ link.size }} • {% endif %}
+                            High Quality Download
+                        </p>
+                    </div>
+                    <a href="{{ link.url }}" class="download-btn" target="_blank" rel="noopener">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Series Episodes Section -->
+    {% if episode and series_episodes %}
+    <section class="episodes-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-list-ol"></i>
+                    {{ episode.series.name }}
+                </h2>
+                <div class="episode-info">
+                    <span class="current-episode">
+                        Season {{ episode.season_number }} • Episode {{ episode.episode_number }}
+                    </span>
+                </div>
+            </div>
+            <div class="episodes-grid">
+                {% for ep in series_episodes %}
+                <div class="episode-card {% if ep.id == episode.id %}current-episode{% endif %}">
+                    <div class="episode-poster">
+                        <img src="{{ ep.movie.image_url|default:'/static/images/default-poster.jpg' }}" 
+                             alt="{{ ep.movie.title }}" loading="lazy">
+                        {% if ep.id != episode.id %}
+                        <div class="episode-overlay">
+                            <a href="{{ ep.movie.get_absolute_url }}" class="episode-play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="current-badge">
+                            <i class="fas fa-play"></i>
+                            Playing
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="episode-info">
+                        <h4 class="episode-title">
+                            S{{ ep.season_number|stringformat:"02d" }}E{{ ep.episode_number|stringformat:"02d" }}
+                        </h4>
+                        <p class="episode-name">{{ ep.movie.title|truncatechars:40 }}</p>
+                        <span class="episode-date">{{ ep.movie.date|date:"M d" }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Related Movies Section -->
+    {% if related_movies %}
+    <section class="related-section">
+        <div class="container">
+            <h2 class="section-title">
+                <i class="fas fa-heart"></i>
+                You Might Also Like
+            </h2>
+            <div class="related-grid">
+                {% for related in related_movies %}
+                <div class="related-card">
+                    <div class="related-poster">
+                        <img src="{{ related.image_url|default:'/static/images/default-poster.jpg' }}" 
+                             alt="{{ related.title }}" loading="lazy">
+                        <div class="related-overlay">
+                            <a href="{{ related.get_absolute_url }}" class="related-play-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="related-info">
+                        <h3 class="related-title">
+                            <a href="{{ related.get_absolute_url }}">{{ related.title|truncatechars:35 }}</a>
+                        </h3>
+                        <div class="related-meta">
+                            <span class="views">
+                                <i class="fas fa-eye"></i>
+                                {{ related.view_count|default:0|floatformat:0 }}
+                            </span>
+                            <span class="date">{{ related.date|date:"M d" }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Share Modal -->
+    <div class="modal" id="share-modal">
+        <div class="modal-backdrop" onclick="closeModal('share-modal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Share "{{ movie.title|truncatechars:30 }}"</h3>
+                <button class="close-modal" onclick="closeModal('share-modal')" aria-label="Close modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="share-options">
+                    <a href="#" class="share-btn facebook" onclick="shareOn('facebook')" data-platform="facebook">
+                        <i class="fab fa-facebook-f"></i>
+                        Facebook
+                    </a>
+                    <a href="#" class="share-btn twitter" onclick="shareOn('twitter')" data-platform="twitter">
+                        <i class="fab fa-twitter"></i>
+                        Twitter
+                    </a>
+                    <a href="#" class="share-btn whatsapp" onclick="shareOn('whatsapp')" data-platform="whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp
+                    </a>
+                    <a href="#" class="share-btn telegram" onclick="shareOn('telegram')" data-platform="telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                        Telegram
+                    </a>
+                </div>
+                <div class="share-link">
+                    <label for="share-url-input">Copy Link:</label>
+                    <div class="input-group">
+                        <input type="text" id="share-url-input" 
+                               value="{{ request.build_absolute_uri }}" 
+                               readonly>
+                        <button class="copy-btn" onclick="copyToClipboard()" aria-label="Copy link">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-red: #dc2626;
+    --primary-gold: #ffd700;
+    --primary-black: #0f0f0f;
+    --light-gray: #1a1a1a;
+    --medium-gray: #2d2d2d;
+    --dark-gray: #141414;
+    --white: #ffffff;
+    --text-gray: #a0a0a0;
+    --text-light: #d1d5db;
+    --gradient-red: linear-gradient(135deg, var(--primary-red), #b91c1c);
+    --gradient-gold: linear-gradient(135deg, var(--primary-gold), #f59e0b);
+    --gradient-dark: linear-gradient(135deg, var(--primary-black), var(--light-gray));
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --border-radius: 12px;
+    --border-radius-small: 8px;
+}
+
+/* Container */
+.movie-detail-container {
+    margin-top: -70px;
+    position: relative;
+}
+
+/* Movie Hero Section */
+.movie-hero {
+    position: relative;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: var(--primary-black);
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.hero-bg-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(8px) brightness(0.3);
+    transform: scale(1.1);
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.4) 0%, rgba(15, 15, 15, 0.9) 70%);
+}
+
+.hero-content {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 4rem;
+    align-items: start;
+    padding: 120px 0 60px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Movie Poster */
+.poster-wrapper {
+    position: relative;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-heavy);
+    transition: var(--transition-smooth);
+}
+
+.poster-wrapper:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 60px rgba(220, 38, 38, 0.3);
+}
+
+.movie-poster-large {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+}
+
+.poster-play-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.8), rgba(255, 215, 0, 0.8));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.poster-wrapper:hover .poster-play-overlay {
+    opacity: 1;
+}
+
+.hero-play-btn {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--primary-black);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow-medium);
+}
+
+.hero-play-btn:hover {
+    transform: scale(1.05);
+    background: var(--primary-gold);
+}
+
+/* Movie Info Section */
+.movie-info-section {
+    color: var(--white);
+    padding-top: 1rem;
+}
+
+.movie-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.movie-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-light);
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-small);
+    backdrop-filter: blur(10px);
+    transition: var(--transition-smooth);
+}
+
+.meta-item:hover {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.meta-item i {
+    color: var(--primary-gold);
+}
+
+/* Categories */
+.movie-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.category-badge {
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(255, 215, 0, 0.2));
+    color: var(--primary-gold);
+    padding: 0.5rem 1.25rem;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    backdrop-filter: blur(10px);
+    transition: var(--transition-smooth);
+    font-size: 0.9rem;
+}
+
+.category-badge:hover {
+    background: var(--primary-gold);
+    color: var(--primary-black);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+
+/* Description */
+.movie-description {
+    margin-bottom: 2.5rem;
+}
+
+.movie-description p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-light);
+    max-width: 600px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.btn-watch, .btn-download, .btn-favorite, .btn-share {
+    padding: 0.875rem 1.75rem;
+    border-radius: 50px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    font-size: 1rem;
+    min-height: 48px;
+}
+
+.btn-watch {
+    background: var(--gradient-red);
+    color: var(--white);
+    box-shadow: var(--shadow-light);
+}
+
+.btn-download {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    box-shadow: var(--shadow-light);
+}
+
+.btn-favorite, .btn-share {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.btn-watch:hover, .btn-download:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-favorite:hover {
+    background: var(--gradient-red);
+    border-color: var(--primary-red);
+}
+
+.btn-share:hover {
+    background: rgba(79, 70, 229, 0.8);
+    border-color: #4f46e5;
+}
+
+/* Video Player Section */
+.video-player-section {
+    padding: 4rem 0;
+    background: var(--gradient-dark);
+}
+
+.player-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-title {
+    color: var(--white);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.source-selector select {
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-small);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.fullscreen-btn {
+    background: var(--gradient-red);
+    color: var(--white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fullscreen-btn:hover {
+    background: var(--primary-gold);
+    color: var(--primary-black);
+}
+
+/* Video Wrapper */
+.video-wrapper {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: var(--primary-black);
+    overflow: hidden;
+}
+
+.video-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-black);
+    color: var(--white);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 215, 0, 0.3);
+    border-top: 3px solid var(--primary-gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#video-player-element, #video-frame {
+    width: 100%;
+    height: 100%;
+    background: var(--primary-black);
+}
+
+.player-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.now-playing h3 {
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.video-info {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.player-stats {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.separator {
+    opacity: 0.5;
+}
+
+/* Download Section */
+.download-section {
+    padding: 4rem 0;
+    background: var(--light-gray);
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-title i {
+    color: var(--primary-gold);
+}
+
+.download-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.download-card {
+    background: var(--medium-gray);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition-smooth);
+}
+
+.download-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--primary-gold);
+}
+
+.download-icon {
+    font-size: 2.5rem;
+    color: var(--primary-gold);
+    background: rgba(255, 215, 0, 0.1);
+    padding: 1rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.download-info {
+    flex: 1;
+}
+
+.download-info h4 {
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.download-meta {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.download-btn {
+    background: var(--gradient-red);
+    color: var(--white);
+    padding: 0.875rem 1.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-light);
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Episodes Section */
+.episodes-section {
+    padding: 4rem 0;
+    background: var(--primary-black);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.episode-info .current-episode {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.episode-card {
+    background: var(--medium-gray);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition-smooth);
+    border: 2px solid transparent;
+}
+
+.episode-card.current-episode {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.episode-card:hover:not(.current-episode) {
+    transform: translateY(-5px);
+    border-color: var(--primary-red);
+    box-shadow: var(--shadow-medium);
+}
+
+.episode-poster {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+}
+
+.episode-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-smooth);
+}
+
+.episode-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.episode-card:hover .episode-overlay {
+    opacity: 1;
+}
+
+.episode-card:hover .episode-poster img {
+    transform: scale(1.1);
+}
+
+.episode-play-btn {
+    background: var(--gradient-gold);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-black);
+    font-size: 18px;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+}
+
+.episode-play-btn:hover {
+    transform: scale(1.1);
+}
+
+.current-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.episode-info {
+    padding: 1.5rem;
+}
+
+.episode-title {
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.episode-name {
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 0 0 0.75rem 0;
+}
+
+.episode-date {
+    color: var(--primary-gold);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Related Section */
+.related-section {
+    padding: 4rem 0;
+    background: var(--light-gray);
+}
+
+.related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.related-card {
+    background: var(--medium-gray);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition-smooth);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.related-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.related-poster {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+}
+
+.related-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-smooth);
+}
+
+.related-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.related-card:hover .related-overlay {
+    opacity: 1;
+}
+
+.related-card:hover .related-poster img {
+    transform: scale(1.1);
+}
+
+.related-play-btn {
+    background: var(--gradient-gold);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-black);
+    font-size: 18px;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+}
+
+.related-play-btn:hover {
+    transform: scale(1.1);
+}
+
+.related-info {
+    padding: 1.25rem;
+}
+
+.related-title {
+    margin-bottom: 0.75rem;
+}
+
+.related-title a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    transition: var(--transition-smooth);
+}
+
+.related-title a:hover {
+    color: var(--primary-gold);
+}
+
+.related-meta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-gray);
+    font-size: 0.85rem;
+}
+
+.related-meta .views {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    color: var(--white);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    padding: 0.5rem;
+    border-radius: 50%;
+}
+
+.close-modal:hover {
+    color: var(--primary-red);
+    background: rgba(220, 38, 38, 0.1);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.share-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.share-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--border-radius-small);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+    justify-content: center;
+}
+
+.share-btn.facebook {
+    background: #1877f2;
+    color: white;
+}
+
+.share-btn.twitter {
+    background: #1da1f2;
+    color: white;
+}
+
+.share-btn.whatsapp {
+    background: #25d366;
+    color: white;
+}
+
+.share-btn.telegram {
+    background: #0088cc;
+    color: white;
+}
+
+.share-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+
+.share-link {
+    margin-top: 1.5rem;
+}
+
+.share-link label {
+    display: block;
+    color: var(--white);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.input-group input {
+    flex: 1;
+    background: var(--medium-gray);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--white);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-small);
+    font-size: 0.9rem;
+}
+
+.copy-btn {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius-small);
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+}
+
+.copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-light);
+}
+
+/* Screen Reader Only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .hero-content {
+        grid-template-columns: 300px 1fr;
+        gap: 3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 2rem;
+        padding: 100px 0 40px;
+    }
+
+    .poster-wrapper {
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    .movie-meta {
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .action-buttons {
+        justify-content: center;
+    }
+
+    .player-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .player-footer {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .download-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .episodes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .share-options {
+        grid-template-columns: 1fr;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .poster-wrapper {
+        max-width: 240px;
+    }
+
+    .movie-title {
+        font-size: 2rem;
+    }
+
+    .btn-watch, .btn-download, .btn-favorite, .btn-share {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .download-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .episodes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .related-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+/* Focus Styles */
+.hero-play-btn:focus,
+.btn-watch:focus,
+.btn-download:focus,
+.btn-favorite:focus,
+.btn-share:focus,
+.fullscreen-btn:focus,
+.copy-btn:focus {
+    outline: 2px solid var(--primary-gold);
+    outline-offset: 2px;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentVideoSource = 0;
+let isFullscreen = false;
+
+// Scroll to player
+function scrollToPlayer() {
+    const player = document.getElementById('video-player');
+    if (player) {
+        player.scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => showVideo(), 800);
+    }
+}
+
+// Show video player
+function showVideo() {
+    const loading = document.getElementById('video-loading');
+    const videoElement = document.getElementById('video-player-element');
+    const videoFrame = document.getElementById('video-frame');
+    
+    setTimeout(() => {
+        loading.style.display = 'none';
+        
+        if (videoElement) {
+            videoElement.style.display = 'block';
+            videoElement.play().catch(e => console.log('Auto-play prevented'));
+        }
+        
+        if (videoFrame) {
+            videoFrame.style.display = 'block';
+        }
+    }, 2000);
+}
+
+// Change video source
+function changeVideoSource() {
+    const select = document.getElementById('source-select');
+    const selectedOption = select.options[select.selectedIndex];
+    const newUrl = selectedOption.dataset.url;
+    const sourceType = selectedOption.dataset.type;
+    
+    const videoElement = document.getElementById('video-player-element');
+    const videoFrame = document.getElementById('video-frame');
+    const loading = document.getElementById('video-loading');
+    
+    loading.style.display = 'flex';
+    
+    if (videoElement) videoElement.style.display = 'none';
+    if (videoFrame) videoFrame.style.display = 'none';
+    
+    setTimeout(() => {
+        if (sourceType === 'iframe' || newUrl.includes('embed')) {
+            if (videoFrame) {
+                videoFrame.src = newUrl;
+                videoFrame.style.display = 'block';
+            }
+            if (videoElement) videoElement.style.display = 'none';
+        } else {
+            if (videoElement) {
+                const source = videoElement.querySelector('source');
+                source.src = newUrl;
+                videoElement.load();
+                videoElement.style.display = 'block';
+                videoElement.play().catch(e => console.log('Auto-play prevented'));
+            }
+            if (videoFrame) videoFrame.style.display = 'none';
+        }
+        
+        loading.style.display = 'none';
+    }, 1500);
+}
+
+// Toggle fullscreen
+function toggleFullscreen() {
+    const wrapper = document.getElementById('video-wrapper');
+    
+    if (!isFullscreen) {
+        if (wrapper.requestFullscreen) {
+            wrapper.requestFullscreen();
+        } else if (wrapper.webkitRequestFullscreen) {
+            wrapper.webkitRequestFullscreen();
+        } else if (wrapper.msRequestFullscreen) {
+            wrapper.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+}
+
+// Update fullscreen button
+function updateFullscreenButton() {
+    const btn = document.querySelector('.fullscreen-btn i');
+    isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+    
+    if (btn) {
+        btn.className = isFullscreen ? 'fas fa-compress' : 'fas fa-expand';
+    }
+}
+
+// Toggle downloads
+function toggleDownloads() {
+    const section = document.getElementById('download-section');
+    if (section) {
+        const isVisible = section.style.display !== 'none';
+        section.style.display = isVisible ? 'none' : 'block';
+        
+        if (!isVisible) {
+            section.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+}
+
+// Toggle favorite
+function toggleFavorite(movieId) {
+    const btn = document.querySelector('.btn-favorite');
+    const icon = btn.querySelector('i');
+    
+    if (icon.classList.contains('far')) {
+        icon.className = 'fas fa-heart';
+        btn.innerHTML = '<i class="fas fa-heart"></i> Remove from Favorites';
+        showNotification('Added to favorites!', 'success');
+    } else {
+        icon.className = 'far fa-heart';
+        btn.innerHTML = '<i class="far fa-heart"></i> Favorite';
+        showNotification('Removed from favorites!', 'info');
+    }
+}
+
+// Show share modal
+function showShareModal() {
+    const modal = document.getElementById('share-modal');
+    modal.classList.add('show');
+    modal.style.display = 'flex';
+}
+
+// Close modal
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+}
+
+// Share on social platforms
+function shareOn(platform) {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(document.title);
+    const text = encodeURIComponent('Check out this amazing movie!');
+    
+    let shareUrl = '';
+    
+    switch(platform) {
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+            break;
+        case 'twitter':
+            shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+            break;
+        case 'whatsapp':
+            shareUrl = `https://wa.me/?text=${text}%20${url}`;
+            break;
+        case 'telegram':
+            shareUrl = `https://t.me/share/url?text=${text}&url=${url}`;
+            break;
+    }
+    
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+}
+
+// Copy to clipboard
+function copyToClipboard() {
+    const input = document.getElementById('share-url-input');
+    const btn = document.querySelector('.copy-btn');
+    
+    input.select();
+    document.execCommand('copy');
+    
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i>';
+    
+    showNotification('Link copied to clipboard!', 'success');
+    
+    setTimeout(() => {
+        btn.innerHTML = originalHTML;
+    }, 2000);
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    
+    const iconClass = type === 'success' ? 'check-circle' : 'info-circle';
+    notification.innerHTML = `
+        <i class="fas fa-${iconClass}"></i>
+        <span>${message}</span>
+    `;
+    
+    notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: ${type === 'success' ? 'var(--primary-gold)' : 'var(--primary-red)'};
+        color: ${type === 'success' ? 'var(--primary-black)' : 'var(--white)'};
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-small);
+        font-weight: 600;
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        box-shadow: var(--shadow-medium);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 300px;
+    `;
+
+    document.body.appendChild(notification);
+
+    requestAnimationFrame(() => {
+        notification.style.transform = 'translateX(0)';
+    });
+
+    setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Event listeners
+document.addEventListener('fullscreenchange', updateFullscreenButton);
+document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+document.addEventListener('msfullscreenchange', updateFullscreenButton);
+
+// Close modal on outside click
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-backdrop')) {
+        const modal = e.target.closest('.modal');
+        if (modal) {
+            closeModal(modal.id);
+        }
+    }
+});
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    // Auto-play video if hash is present
+    if (window.location.hash === '#play') {
+        setTimeout(() => scrollToPlayer(), 1000);
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        const videoElement = document.getElementById('video-player-element');
+        
+        if (videoElement && document.activeElement === videoElement) {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (videoElement.paused) {
+                        videoElement.play();
+                    } else {
+                        videoElement.pause();
+                    }
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    videoElement.currentTime += 10;
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    videoElement.currentTime -= 10;
+                    break;
+            }
+        }
+        
+        if (e.key === 'Escape') {
+            const openModal = document.querySelector('.modal.show');
+            if (openModal) {
+                closeModal(openModal.id);
+            } else if (isFullscreen) {
+                toggleFullscreen();
+            }
+        }
+    });
+    
+    // Enhanced image loading
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+        img.addEventListener('load', () => {
+            img.style.opacity = '1';
+        });
+        
+        img.addEventListener('error', () => {
+            img.src = '/static/images/default-poster.jpg';
+        });
+    });
+    
+    // Video player events
+    const videoElement = document.getElementById('video-player-element');
+    if (videoElement) {
+        videoElement.addEventListener('loadstart', () => {
+            showNotification('Loading video...', 'info');
+        });
+        
+        videoElement.addEventListener('canplay', () => {
+            showNotification('Video ready to play', 'success');
+        });
+        
+        videoElement.addEventListener('error', () => {
+            showNotification('Error loading video. Please try another source.', 'error');
+        });
+    }
+});
+</script>
+{% endblock %}

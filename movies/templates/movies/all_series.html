@@ -1,0 +1,963 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}All Series - BangXXX{% endblock %}
+
+{% block meta_description %}Browse all series collections on BangXXX. Watch complete episode series organized for your viewing pleasure.{% endblock %}
+
+{% block content %}
+<!-- Series Hero Section -->
+<section class="series-hero">
+    <div class="hero-background"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-icon">
+                <i class="fas fa-list-ol"></i>
+            </div>
+            <h1 class="hero-title">All Series</h1>
+            <p class="hero-subtitle">Discover complete collections and episodic content organized for binge-watching</p>
+            <div class="hero-stats">
+                <span class="stat-item">
+                    <i class="fas fa-tv"></i>
+                    {{ series_list|length }} Series
+                </span>
+                <span class="stat-item">
+                    <i class="fas fa-play-circle"></i>
+                    Episodes Available
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Series Section -->
+<section class="section">
+    <div class="container">
+        <!-- Controls -->
+        <div class="series-controls">
+            <div class="search-series">
+                <input type="text" id="series-search" placeholder="Search series..." class="series-search-input">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            
+            <div class="filter-controls">
+                <select id="sort-series" class="sort-select">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="alphabetical">A-Z</option>
+                    <option value="episodes">Most Episodes</option>
+                </select>
+                
+                <div class="view-toggle-container">
+                    <button class="view-toggle active" data-view="grid" title="Grid View">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="view-toggle" data-view="list" title="List View">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {% if series_list %}
+            <!-- Series Grid -->
+            <div class="series-container">
+                <div class="series-grid" id="series-grid">
+                    {% for series in series_list %}
+                        <div class="series-card" 
+                             data-name="{{ series.name|lower }}" 
+                             data-episodes="{{ series.episode_count }}"
+                             data-date="{{ series.created_at|date:'Y-m-d' }}">
+                            <a href="{% url 'movies:series_detail' series.slug %}" class="series-link">
+                                <div class="series-poster">
+                                    <img src="{{ series.image_url|default:'/static/default-series.jpg' }}" 
+                                         alt="{{ series.name }}" 
+                                         loading="lazy"
+                                         onerror="this.src='/static/default-series.jpg'">
+                                    <div class="series-overlay">
+                                        <div class="play-button-large">
+                                            <i class="fas fa-play"></i>
+                                        </div>
+                                        <div class="series-info-overlay">
+                                            <span class="episode-count-overlay">
+                                                {{ series.episode_count }} Episode{{ series.episode_count|pluralize }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="series-badge">
+                                        {% if series.episode_count > 20 %}
+                                            <span class="badge long">Long Series</span>
+                                        {% elif series.episode_count > 10 %}
+                                            <span class="badge medium">Series</span>
+                                        {% else %}
+                                            <span class="badge short">Mini Series</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="episode-count-badge">
+                                        <i class="fas fa-list"></i>
+                                        {{ series.episode_count }}
+                                    </div>
+                                </div>
+                                
+                                <div class="series-info">
+                                    <h3 class="series-title">{{ series.name }}</h3>
+                                    
+                                    <div class="series-meta">
+                                        <span class="series-date">
+                                            <i class="fas fa-calendar"></i>
+                                            {{ series.created_at|date:"M d, Y" }}
+                                        </span>
+                                        <span class="series-episodes">
+                                            <i class="fas fa-play-circle"></i>
+                                            {{ series.episode_count }} episode{{ series.episode_count|pluralize }}
+                                        </span>
+                                    </div>
+                                    
+                                    {% if series.description %}
+                                        <p class="series-description">{{ series.description|truncatewords:15 }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="series-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 0%"></div>
+                                        </div>
+                                        <span class="progress-text">Start Watching</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- No Results Message -->
+            <div class="no-series-found" id="no-results" style="display: none;">
+                <div class="no-results-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>No series found</h3>
+                <p>Try adjusting your search terms or browse all series</p>
+                <button class="clear-search-btn" onclick="clearSearch()">
+                    <i class="fas fa-times"></i>
+                    Clear Search
+                </button>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="page-btn">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="page-btn active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-series">
+                <div class="empty-icon">
+                    <i class="fas fa-tv"></i>
+                </div>
+                <h3>No Series Available</h3>
+                <p>Series collections will appear here as they're added.</p>
+                <div class="empty-actions">
+                    <a href="{% url 'movies:home' %}" class="browse-btn">
+                        <i class="fas fa-home"></i>
+                        Browse Movies
+                    </a>
+                    <a href="{% url 'movies:all_categories' %}" class="categories-btn">
+                        <i class="fas fa-th-large"></i>
+                        View Categories
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Featured Collections -->
+        <div class="featured-collections">
+            <h3 class="collections-title">
+                <i class="fas fa-star"></i>
+                Explore Content
+            </h3>
+            <div class="collections-grid">
+                <a href="{% url 'movies:home' %}" class="collection-card latest">
+                    <div class="collection-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h4>Latest Movies</h4>
+                    <p>Recently added content</p>
+                </a>
+                <a href="{% url 'movies:home' %}" class="collection-card popular">
+                    <div class="collection-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <h4>Most Popular</h4>
+                    <p>Trending right now</p>
+                </a>
+                <a href="{% url 'movies:all_categories' %}" class="collection-card categories">
+                    <div class="collection-icon">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <h4>All Categories</h4>
+                    <p>Browse by genre</p>
+                </a>
+                <a href="{% url 'movies:home' %}" class="collection-card featured">
+                    <div class="collection-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h4>Featured</h4>
+                    <p>Editor's picks</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Series-specific styles */
+.series-hero {
+    background: var(--gradient-dark);
+    padding: clamp(40px, 8vh, 60px) 0;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+.hero-content {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-icon {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    color: var(--primary-gold);
+    margin-bottom: clamp(15px, 3vh, 20px);
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.hero-title {
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: clamp(15px, 3vh, 20px);
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    color: var(--text-gray);
+    margin-bottom: clamp(25px, 5vh, 35px);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(20px, 4vw, 30px);
+    flex-wrap: wrap;
+}
+
+.series-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(30px, 6vh, 50px);
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.search-series {
+    position: relative;
+    flex-grow: 1;
+    max-width: 400px;
+}
+
+.series-search-input {
+    width: 100%;
+    padding: clamp(10px, 2vw, 12px) clamp(40px, 8vw, 50px) clamp(10px, 2vw, 12px) clamp(15px, 3vw, 20px);
+    background: var(--medium-gray);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: 25px;
+    color: var(--white);
+    font-size: clamp(14px, 3vw, 16px);
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.series-search-input:focus {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.series-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.series-grid {
+    display: grid;
+    gap: clamp(20px, 4vw, 30px);
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    margin-bottom: clamp(40px, 8vh, 60px);
+}
+
+.series-grid.list-view {
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+.series-grid.list-view .series-card {
+    max-height: 200px;
+}
+
+.series-grid.list-view .series-link {
+    flex-direction: row;
+    align-items: center;
+}
+
+.series-grid.list-view .series-poster {
+    width: 300px;
+    flex-shrink: 0;
+    aspect-ratio: 16/9;
+}
+
+.series-grid.list-view .series-info {
+    flex: 1;
+    padding: 0 clamp(15px, 3vw, 25px);
+    text-align: left;
+}
+
+/* Responsive grid layouts */
+@media (min-width: 1400px) {
+    .series-grid:not(.list-view) { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .series-grid:not(.list-view) { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .series-grid:not(.list-view) { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 767px) {
+    .series-grid:not(.list-view) { grid-template-columns: 1fr; }
+}
+
+.series-card {
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition-smooth);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+    position: relative;
+}
+
+.series-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 50px rgba(220, 38, 38, 0.3);
+    border-color: var(--primary-gold);
+}
+
+.series-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.series-poster {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--medium-gray);
+}
+
+.series-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-smooth);
+}
+
+.series-card:hover .series-poster img {
+    transform: scale(1.05);
+}
+
+.series-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(220, 38, 38, 0.4) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.series-card:hover .series-overlay {
+    opacity: 1;
+}
+
+.play-button-large {
+    background: var(--gradient-gold);
+    border-radius: 50%;
+    width: clamp(60px, 12vw, 80px);
+    height: clamp(60px, 12vw, 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    transition: var(--transition-smooth);
+}
+
+.play-button-large:hover {
+    transform: scale(1.1);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+}
+
+.play-button-large i {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--primary-black);
+    margin-left: 3px;
+}
+
+.series-info-overlay {
+    text-align: center;
+}
+
+.episode-count-overlay {
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--white);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: clamp(12px, 2.5vw, 14px);
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.series-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.episode-count-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--gradient-red);
+    color: var(--white);
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-size: clamp(11px, 2vw, 13px);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    backdrop-filter: blur(10px);
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: clamp(10px, 2vw, 12px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.long {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+}
+
+.badge.medium {
+    background: var(--gradient-red);
+    color: var(--white);
+}
+
+.badge.short {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid #22c55e;
+}
+
+.series-info {
+    padding: clamp(15px, 3vw, 25px);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.series-title {
+    font-size: clamp(1.1rem, 3vw, 1.4rem);
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: clamp(10px, 2vw, 15px);
+    transition: var(--transition-smooth);
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.series-card:hover .series-title {
+    color: var(--primary-gold);
+}
+
+.series-meta {
+    display: flex;
+    justify-content: center;
+    gap: clamp(10px, 3vw, 20px);
+    margin-bottom: clamp(10px, 2vw, 15px);
+    font-size: clamp(12px, 2.5vw, 14px);
+    color: var(--text-gray);
+    flex-wrap: wrap;
+}
+
+.series-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.series-meta i {
+    color: var(--primary-gold);
+    font-size: 0.9em;
+}
+
+.series-description {
+    color: var(--text-gray);
+    font-size: clamp(12px, 2.5vw, 14px);
+    line-height: 1.4;
+    margin-bottom: clamp(15px, 3vw, 20px);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.series-progress {
+    margin-top: auto;
+}
+
+.progress-bar {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    background: var(--gradient-gold);
+    height: 100%;
+    border-radius: 10px;
+    transition: var(--transition-smooth);
+}
+
+.progress-text {
+    font-size: clamp(11px, 2vw, 13px);
+    color: var(--text-gray);
+    font-weight: 500;
+}
+
+/* Empty state and no results */
+.empty-series,
+.no-series-found {
+    text-align: center;
+    padding: clamp(60px, 12vh, 100px) 20px;
+    color: var(--text-gray);
+}
+
+.empty-icon,
+.no-results-icon {
+    font-size: clamp(4rem, 10vw, 6rem);
+    color: var(--primary-gold);
+    margin-bottom: clamp(25px, 5vh, 35px);
+    opacity: 0.7;
+}
+
+.empty-series h3,
+.no-series-found h3 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: clamp(15px, 3vh, 20px);
+    color: var(--white);
+}
+
+.empty-series p,
+.no-series-found p {
+    font-size: clamp(14px, 3vw, 16px);
+    margin-bottom: clamp(25px, 5vh, 35px);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.browse-btn,
+.categories-btn,
+.clear-search-btn {
+    background: var(--gradient-red);
+    border: none;
+    color: var(--white);
+    padding: clamp(12px, 3vw, 15px) clamp(20px, 4vw, 25px);
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: clamp(14px, 3vw, 16px);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.browse-btn:hover,
+.categories-btn:hover,
+.clear-search-btn:hover {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    transform: translateY(-2px);
+}
+
+.categories-btn {
+    background: var(--medium-gray);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.categories-btn:hover {
+    background: var(--gradient-gold);
+    border-color: var(--primary-gold);
+}
+
+/* Featured Collections */
+.featured-collections {
+    margin-top: clamp(50px, 10vh, 80px);
+    padding-top: clamp(40px, 8vh, 60px);
+    border-top: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.collections-title {
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    font-weight: 700;
+    color: var(--primary-gold);
+    margin-bottom: clamp(25px, 5vh, 35px);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: clamp(15px, 3vw, 20px);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.collection-card {
+    background: var(--light-gray);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+    border-radius: var(--border-radius);
+    padding: clamp(20px, 4vw, 30px);
+    text-decoration: none;
+    color: var(--white);
+    text-align: center;
+    transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 2vw, 12px);
+}
+
+.collection-card:hover {
+    border-color: var(--primary-gold);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2);
+}
+
+.collection-icon {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--primary-gold);
+    margin-bottom: 5px;
+}
+
+.collection-card h4 {
+    font-weight: 600;
+    font-size: clamp(14px, 3vw, 16px);
+    margin-bottom: 5px;
+}
+
+.collection-card p {
+    color: var(--text-gray);
+    font-size: clamp(12px, 2.5vw, 14px);
+    margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .series-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-controls {
+        justify-content: space-between;
+    }
+    
+    .search-series {
+        max-width: none;
+        margin-bottom: 15px;
+    }
+    
+    .collections-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .series-grid.list-view .series-link {
+        flex-direction: column;
+    }
+    
+    .series-grid.list-view .series-poster {
+        width: 100%;
+    }
+    
+    .series-grid.list-view .series-info {
+        padding: clamp(15px, 3vw, 20px);
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-stats {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .collections-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .empty-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const seriesSearch = document.getElementById('series-search');
+    const sortSeries = document.getElementById('sort-series');
+    const seriesGrid = document.getElementById('series-grid');
+    const viewToggles = document.querySelectorAll('.view-toggle');
+    const noResults = document.getElementById('no-results');
+    
+    let allSeries = Array.from(document.querySelectorAll('.series-card'));
+    
+    // Search functionality
+    if (seriesSearch) {
+        seriesSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            filterSeries(searchTerm);
+        });
+    }
+    
+    // Sort functionality
+    if (sortSeries) {
+        sortSeries.addEventListener('change', function() {
+            const sortType = this.value;
+            sortSeriesByType(sortType);
+            
+            // Save sort preference
+            try {
+                localStorage.setItem('series-sort-preference', sortType);
+            } catch(e) {
+                // localStorage not available
+            }
+        });
+        
+        // Restore sort preference
+        try {
+            const savedSort = localStorage.getItem('series-sort-preference');
+            if (savedSort) {
+                sortSeries.value = savedSort;
+                sortSeriesByType(savedSort);
+            }
+        } catch(e) {
+            // localStorage not available
+        }
+    }
+    
+    // View toggle functionality
+    viewToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const view = this.dataset.view;
+            
+            // Update active state
+            viewToggles.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update grid class
+            if (seriesGrid) {
+                seriesGrid.className = view === 'list' ? 'series-grid list-view' : 'series-grid';
+            }
+            
+            // Save view preference
+            try {
+                localStorage.setItem('series-view-preference', view);
+            } catch(e) {
+                // localStorage not available
+            }
+        });
+    });
+    
+    // Restore view preference
+    try {
+        const savedView = localStorage.getItem('series-view-preference');
+        if (savedView) {
+            const targetToggle = document.querySelector(`[data-view="${savedView}"]`);
+            if (targetToggle) {
+                targetToggle.click();
+            }
+        }
+    } catch(e) {
+        // localStorage not available
+    }
+    
+    // Initialize progress bars with random values (simulate watch progress)
+    const progressBars = document.querySelectorAll('.progress-fill');
+    progressBars.forEach((bar, index) => {
+        const progress = Math.floor(Math.random() * 100);
+        bar.style.width = progress + '%';
+        
+        const progressText = bar.parentElement.nextElementSibling;
+        if (progress === 0) {
+            progressText.textContent = 'Start Watching';
+        } else if (progress === 100) {
+            progressText.textContent = 'Completed';
+            progressText.style.color = 'var(--primary-gold)';
+        } else {
+            progressText.textContent = `${progress}% Complete`;
+        }
+    });
+    
+    function filterSeries(searchTerm) {
+        let visibleCount = 0;
+        
+        allSeries.forEach(series => {
+            const name = series.dataset.name;
+            const isVisible = name.includes(searchTerm);
+            
+            series.style.display = isVisible ? 'block' : 'none';
+            if (isVisible) visibleCount++;
+        });
+        
+        // Show/hide no results message
+        if (noResults) {
+            noResults.style.display = visibleCount === 0 && searchTerm ? 'block' : 'none';
+        }
+    }
+    
+    function sortSeriesByType(sortType) {
+        const series = Array.from(seriesGrid.querySelectorAll('.series-card'));
+        
+        series.sort((a, b) => {
+            switch(sortType) {
+                case 'newest':
+                    return new Date(b.dataset.date) - new Date(a.dataset.date);
+                case 'oldest':
+                    return new Date(a.dataset.date) - new Date(b.dataset.date);
+                case 'alphabetical':
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                case 'episodes':
+                    return parseInt(b.dataset.episodes || 0) - parseInt(a.dataset.episodes || 0);
+                default:
+                    return 0;
+            }
+        });
+        
+        // Clear and re-append sorted series
+        seriesGrid.innerHTML = '';
+        series.forEach(series => seriesGrid.appendChild(series));
+    }
+    
+    // Smooth scroll to top when pagination is used
+    document.querySelectorAll('.pagination a').forEach(link => {
+        link.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+});
+
+function clearSearch() {
+    const searchInput = document.getElementById('series-search');
+    const noResults = document.getElementById('no-results');
+    
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    }
+    
+    if (noResults) {
+        noResults.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

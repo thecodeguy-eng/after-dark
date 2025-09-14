@@ -1,0 +1,508 @@
+{% extends 'movies/base.html' %}
+
+{% block title %}Page Not Found - BangXXX{% endblock %}
+
+{% block meta_description %}The page you're looking for could not be found. Browse our latest adult entertainment content instead.{% endblock %}
+
+{% block content %}
+<section class="error-section">
+    <div class="container">
+        <div class="error-content">
+            <!-- Animated 404 Display -->
+            <div class="error-number">
+                <span class="error-digit" data-number="4">4</span>
+                <span class="error-digit" data-number="0">0</span>
+                <span class="error-digit" data-number="4">4</span>
+            </div>
+            
+            <!-- Error Message -->
+            <div class="error-message">
+                <h1 class="error-title">Content Not Found</h1>
+                <p class="error-subtitle">The content you're looking for has been moved, deleted, or never existed.</p>
+            </div>
+            
+            <!-- Search Section -->
+            <div class="error-search">
+                <form method="GET" action="{% url 'movies:search' %}" class="error-search-form">
+                    <div class="search-wrapper">
+                        <input type="text" name="q" class="error-search-input" placeholder="Search for content..." autocomplete="off">
+                        <button type="submit" class="error-search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="error-actions">
+                <a href="{% url 'movies:home' %}" class="btn btn-primary">
+                    <i class="fas fa-home"></i>
+                    Go Home
+                </a>
+                <a href="{% url 'movies:all_categories' %}" class="btn btn-secondary">
+                    <i class="fas fa-th-large"></i>
+                    Browse Categories
+                </a>
+                <button onclick="history.back()" class="btn btn-outline">
+                    <i class="fas fa-arrow-left"></i>
+                    Go Back
+                </button>
+            </div>
+            
+            <!-- Popular Content Section -->
+            <div class="error-suggestions">
+                <h2 class="suggestions-title">Popular Content</h2>
+                <div class="suggestions-grid">
+                    {% for movie in popular_movies|slice:":6" %}
+                    <div class="suggestion-card">
+                        <a href="{{ movie.get_absolute_url }}" class="suggestion-link">
+                            <div class="suggestion-poster">
+                                <img src="{{ movie.image_url }}" alt="{{ movie.title }}" loading="lazy" onerror="this.src='/static/img/default-poster.jpg'">
+                                <div class="suggestion-overlay">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <h3 class="suggestion-title">{{ movie.title }}</h3>
+                        </a>
+                    </div>
+                    {% empty %}
+                    <!-- Fallback content if no movies available -->
+                    <div class="suggestion-card">
+                        <div class="suggestion-poster placeholder">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <h3 class="suggestion-title">No content available</h3>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* 404 Error Page Styles */
+.error-section {
+    min-height: calc(100vh - var(--header-height) - 200px);
+    padding: clamp(40px, 8vh, 80px) 0;
+    background: var(--gradient-dark);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
+
+.error-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.05) 0%, transparent 70%);
+    animation: errorPulse 6s ease-in-out infinite;
+}
+
+@keyframes errorPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+}
+
+.error-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Animated 404 Number */
+.error-number {
+    display: flex;
+    justify-content: center;
+    gap: clamp(10px, 3vw, 20px);
+    margin-bottom: clamp(30px, 6vh, 50px);
+}
+
+.error-digit {
+    font-size: clamp(6rem, 20vw, 12rem);
+    font-weight: 900;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+    animation: digitFloat 3s ease-in-out infinite;
+    display: inline-block;
+    line-height: 1;
+}
+
+.error-digit:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.error-digit:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.error-digit:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes digitFloat {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+    }
+    50% {
+        transform: translateY(-10px) scale(1.05);
+        filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
+    }
+}
+
+/* Error Message */
+.error-message {
+    margin-bottom: clamp(40px, 8vh, 60px);
+}
+
+.error-title {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: clamp(15px, 3vh, 25px);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+}
+
+.error-subtitle {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    color: var(--text-gray);
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Search Section */
+.error-search {
+    margin-bottom: clamp(40px, 8vh, 60px);
+}
+
+.error-search-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.error-search-input {
+    width: 100%;
+    padding: clamp(15px, 3vw, 18px) clamp(50px, 10vw, 60px) clamp(15px, 3vw, 18px) clamp(20px, 4vw, 25px);
+    background: var(--glass-bg);
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    border-radius: clamp(25px, 5vw, 30px);
+    color: var(--white);
+    font-size: clamp(14px, 3vw, 16px);
+    outline: none;
+    transition: var(--transition-smooth);
+    backdrop-filter: blur(20px);
+}
+
+.error-search-input:focus {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    transform: scale(1.02);
+}
+
+.error-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.error-search-btn {
+    position: absolute;
+    right: clamp(8px, 2vw, 12px);
+    background: var(--gradient-red);
+    border: none;
+    border-radius: 50%;
+    width: clamp(35px, 7vw, 45px);
+    height: clamp(35px, 7vw, 45px);
+    color: var(--white);
+    font-size: clamp(14px, 3vw, 16px);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-search-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+}
+
+/* Action Buttons */
+.error-actions {
+    display: flex;
+    gap: clamp(12px, 3vw, 20px);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: clamp(60px, 12vh, 80px);
+}
+
+.btn {
+    padding: clamp(12px, 3vw, 15px) clamp(20px, 4vw, 30px);
+    border-radius: clamp(25px, 5vw, 30px);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: clamp(14px, 3vw, 16px);
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(8px, 2vw, 10px);
+    transition: var(--transition-smooth);
+    border: 2px solid transparent;
+    cursor: pointer;
+    min-width: clamp(120px, 25vw, 140px);
+    justify-content: center;
+    text-align: center;
+}
+
+.btn-primary {
+    background: var(--gradient-red);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+}
+
+.btn-secondary {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--white);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary-gold);
+    color: var(--primary-gold);
+    transform: translateY(-3px);
+}
+
+/* Popular Content Suggestions */
+.error-suggestions {
+    margin-top: clamp(40px, 8vh, 60px);
+}
+
+.suggestions-title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 700;
+    color: var(--primary-gold);
+    margin-bottom: clamp(30px, 6vh, 40px);
+    text-align: center;
+}
+
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(clamp(150px, 25vw, 200px), 1fr));
+    gap: clamp(15px, 3vw, 25px);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.suggestion-card {
+    background: var(--glass-bg);
+    border-radius: clamp(12px, 3vw, 16px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition-smooth);
+    backdrop-filter: blur(20px);
+}
+
+.suggestion-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(220, 38, 38, 0.3);
+    border-color: var(--primary-gold);
+}
+
+.suggestion-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.suggestion-poster {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--medium-gray);
+}
+
+.suggestion-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-smooth);
+}
+
+.suggestion-poster.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-gray);
+    font-size: clamp(30px, 6vw, 40px);
+}
+
+.suggestion-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(220, 38, 38, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: clamp(20px, 4vw, 24px);
+    opacity: 0;
+    transition: var(--transition-smooth);
+    backdrop-filter: blur(5px);
+}
+
+.suggestion-card:hover .suggestion-overlay {
+    opacity: 1;
+}
+
+.suggestion-card:hover .suggestion-poster img {
+    transform: scale(1.1);
+}
+
+.suggestion-title {
+    padding: clamp(12px, 3vw, 16px);
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-align: left;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .error-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .suggestions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .error-number {
+        gap: clamp(5px, 2vw, 10px);
+    }
+    
+    .suggestions-grid {
+        grid-template-columns: 1fr;
+        max-width: 300px;
+    }
+}
+
+/* Accessibility and Touch Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .suggestion-overlay {
+        opacity: 0.7;
+    }
+    
+    .btn:active {
+        transform: scale(0.98);
+    }
+    
+    .suggestion-card:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Dark mode enhancement */
+@media (prefers-color-scheme: dark) {
+    .error-search-input {
+        background: rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .error-digit,
+    .error-section::before {
+        animation: none;
+    }
+    
+    .error-digit {
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add some interactive behavior to the error digits
+    const errorDigits = document.querySelectorAll('.error-digit');
+    
+    errorDigits.forEach((digit, index) => {
+        digit.addEventListener('mouseenter', function() {
+            this.style.animationPlayState = 'paused';
+            this.style.transform = 'translateY(-15px) scale(1.1)';
+        });
+        
+        digit.addEventListener('mouseleave', function() {
+            this.style.animationPlayState = 'running';
+            this.style.transform = '';
+        });
+    });
+    
+    // Enhanced search functionality
+    const errorSearchInput = document.querySelector('.error-search-input');
+    if (errorSearchInput) {
+        errorSearchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.closest('form').submit();
+            }
+        });
+    }
+    
+    // Add click tracking for analytics (if needed)
+    const actionButtons = document.querySelectorAll('.btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Add analytics tracking here if needed
+            console.log('404 action clicked:', this.textContent.trim());
+        });
+    });
+});
+</script>
+{% endblock %}

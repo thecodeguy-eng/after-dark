@@ -1,0 +1,399 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}{{ series.name }} - BangXXX{% endblock %}
+
+{% block meta_description %}Watch all episodes from {{ series.name }} series. High-quality streaming and downloads available.{% endblock %}
+
+{% block content %}
+<!-- Series Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">{{ series.name }}</h1>
+        {% if series.description %}
+            <p class="hero-subtitle">{{ series.description|truncatewords:30 }}</p>
+        {% endif %}
+        <div class="series-stats">
+            <span class="stat-item">
+                <i class="fas fa-play-circle"></i>
+                {{ episodes|length }} Episode{{ episodes|length|pluralize }}
+            </span>
+            <span class="stat-item">
+                <i class="fas fa-calendar-alt"></i>
+                {{ series.created_at|date:"M Y" }}
+            </span>
+        </div>
+    </div>
+</section>
+
+<!-- Episodes Grid -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-list"></i>
+                All Episodes
+            </h2>
+            <div class="episode-count">
+                Showing {{ episodes|length }} episode{{ episodes|length|pluralize }}
+            </div>
+        </div>
+
+        {% if episodes %}
+            <!-- Season/Episode Organization -->
+            <div class="episodes-container">
+                {% regroup episodes by season_number as season_list %}
+                {% for season in season_list %}
+                    <div class="season-group">
+                        <h3 class="season-title">
+                            Season {{ season.grouper }}
+                            <span class="episode-count-badge">{{ season.list|length }} episode{{ season.list|length|pluralize }}</span>
+                        </h3>
+                        
+                        <div class="episodes-grid">
+                            {% for episode in season.list %}
+                                <div class="episode-card">
+                                    <div class="episode-poster">
+                                        <img src="{{ episode.movie.image_url|default:'/static/default-poster.jpg' }}" 
+                                             alt="{{ episode.movie.title }}" 
+                                             loading="lazy"
+                                             onerror="this.src='/static/default-poster.jpg'">
+                                        <div class="episode-overlay">
+                                            <a href="{{ episode.movie.get_absolute_url }}" class="play-button" aria-label="Play {{ episode.movie.title }}">
+                                                <i class="fas fa-play"></i>
+                                            </a>
+                                        </div>
+                                        <div class="episode-number">
+                                            E{{ episode.episode_number|stringformat:"02d" }}
+                                        </div>
+                                        {% if episode.movie.get_primary_video_source %}
+                                            <div class="episode-duration">
+                                                <i class="fas fa-clock"></i>
+                                                HD
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="episode-info">
+                                        <h4 class="episode-title">
+                                            <a href="{{ episode.movie.get_absolute_url }}">{{ episode.movie.title }}</a>
+                                        </h4>
+                                        
+                                        <div class="episode-meta">
+                                            <span class="episode-date">
+                                                <i class="fas fa-calendar"></i>
+                                                {{ episode.movie.date|date:"M d, Y" }}
+                                            </span>
+                                            {% if episode.movie.view_count %}
+                                                <span class="episode-views">
+                                                    <i class="fas fa-eye"></i>
+                                                    {{ episode.movie.view_count|floatformat:0 }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {% if episode.movie.excerpt %}
+                                            <p class="episode-excerpt">{{ episode.movie.excerpt|truncatewords:20 }}</p>
+                                        {% endif %}
+                                        
+                                        {% if episode.movie.categories.exists %}
+                                            <div class="episode-categories">
+                                                {% for category in episode.movie.categories.all %}
+                                                    <a href="{% url 'movies:category' category.slug %}" class="category-tag">{{ category.name }}</a>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="page-btn">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="page-btn active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-content">
+                <i class="fas fa-film"></i>
+                <h3>No Episodes Available</h3>
+                <p>This series doesn't have any episodes yet. Check back later!</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+/* Series-specific styles */
+.series-stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(20px, 4vw, 30px);
+    margin-top: clamp(20px, 4vh, 30px);
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(220, 38, 38, 0.1);
+    padding: clamp(8px, 2vw, 12px) clamp(15px, 3vw, 20px);
+    border-radius: var(--border-radius-small);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: var(--primary-gold);
+    font-weight: 500;
+    font-size: clamp(13px, 2.5vw, 16px);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(25px, 5vh, 40px);
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.episode-count {
+    color: var(--text-gray);
+    font-size: clamp(13px, 2.5vw, 16px);
+}
+
+.season-group {
+    margin-bottom: clamp(40px, 6vh, 60px);
+}
+
+.season-title {
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    font-weight: 700;
+    color: var(--primary-gold);
+    margin-bottom: clamp(20px, 4vh, 30px);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.episode-count-badge {
+    background: var(--gradient-red);
+    color: var(--white);
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: clamp(11px, 2vw, 14px);
+    font-weight: 500;
+}
+
+.episodes-grid {
+    display: grid;
+    gap: clamp(15px, 3vw, 25px);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+@media (min-width: 1400px) {
+    .episodes-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .episodes-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .episodes-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .episodes-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 767px) {
+    .episodes-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+    .episodes-grid { 
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+.episode-card {
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    transition: var(--transition-smooth);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+}
+
+.episode-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(220, 38, 38, 0.25);
+    border-color: var(--primary-gold);
+}
+
+.episode-poster {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: var(--medium-gray);
+}
+
+.episode-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition-smooth);
+}
+
+.episode-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition-smooth);
+}
+
+.episode-card:hover .episode-overlay {
+    opacity: 1;
+}
+
+.episode-card:hover .episode-poster img {
+    transform: scale(1.05);
+}
+
+.episode-number {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: clamp(11px, 2vw, 14px);
+}
+
+.episode-duration {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(220, 38, 38, 0.9);
+    color: var(--white);
+    padding: 5px 8px;
+    border-radius: 8px;
+    font-size: clamp(10px, 2vw, 12px);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.episode-info {
+    padding: clamp(15px, 3vw, 20px);
+}
+
+.episode-title {
+    margin-bottom: clamp(8px, 2vw, 12px);
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.episode-title a {
+    color: var(--white);
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.episode-title a:hover {
+    color: var(--primary-gold);
+}
+
+.episode-meta {
+    display: flex;
+    gap: clamp(10px, 2vw, 15px);
+    align-items: center;
+    margin-bottom: clamp(8px, 2vw, 12px);
+    font-size: clamp(12px, 2vw, 14px);
+    color: var(--text-gray);
+    flex-wrap: wrap;
+}
+
+.episode-meta i {
+    color: var(--primary-gold);
+}
+
+.episode-excerpt {
+    color: var(--text-gray);
+    font-size: clamp(12px, 2vw, 14px);
+    line-height: 1.4;
+    margin-bottom: clamp(10px, 2vw, 15px);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.episode-categories {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.no-content {
+    text-align: center;
+    padding: clamp(40px, 8vh, 80px) 20px;
+    color: var(--text-gray);
+}
+
+.no-content i {
+    font-size: clamp(3rem, 8vw, 5rem);
+    color: var(--primary-gold);
+    margin-bottom: clamp(20px, 4vh, 30px);
+}
+
+.no-content h3 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: clamp(10px, 2vh, 15px);
+    color: var(--white);
+}
+</style>
+{% endblock %}

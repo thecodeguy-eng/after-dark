@@ -1,0 +1,771 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} Movies - BangXXX{% endblock %}
+
+{% block meta_description %}Browse {{ category.name }} category on BangXXX. Discover high-quality adult entertainment in this category.{% endblock %}
+
+{% block content %}
+<!-- Category Hero Section -->
+<section class="category-hero">
+    <div class="category-hero-bg"></div>
+    <div class="container">
+        <div class="category-hero-content">
+            <div class="category-icon">
+                <i class="fas fa-film"></i>
+            </div>
+            <h1 class="category-title">{{ category.name }}</h1>
+            <div class="category-stats">
+                <span class="stat-badge">
+                    <i class="fas fa-play-circle"></i>
+                    {{ movies|length }} Movie{{ movies|length|pluralize }}
+                </span>
+                <span class="stat-badge">
+                    <i class="fas fa-clock"></i>
+                    Updated {{ category.created_at|timesince }} ago
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Movies Section -->
+<section class="section">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-list-ul"></i>
+                All {{ category.name }} Movies
+            </h2>
+            
+            <div class="category-controls">
+                <div class="sort-controls">
+                    <select class="sort-select" id="sort-select">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="title">Title A-Z</option>
+                        <option value="title-desc">Title Z-A</option>
+                    </select>
+                </div>
+                
+                <div class="view-controls">
+                    <button class="view-btn active" data-view="grid" title="Grid View">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="view-btn" data-view="list" title="List View">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {% if movies %}
+            <!-- Movies Grid -->
+            <div class="movies-container">
+                <div class="movie-grid" id="movies-grid">
+                    {% for movie in movies %}
+                        <div class="movie-card" data-date="{{ movie.date|date:'Y-m-d' }}" data-views="{{ movie.view_count }}" data-title="{{ movie.title }}">
+                            <div class="movie-poster">
+                                <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
+                                     alt="{{ movie.title }}" 
+                                     loading="lazy"
+                                     onerror="this.src='/static/default-poster.jpg'">
+                                <div class="movie-overlay">
+                                    <a href="{{ movie.get_absolute_url }}" class="play-button" aria-label="Watch {{ movie.title }}">
+                                        <i class="fas fa-play"></i>
+                                    </a>
+                                </div>
+                                {% if movie.get_primary_video_source %}
+                                    <div class="movie-quality">HD</div>
+                                {% endif %}
+                                {% if movie.is_sticky %}
+                                    <div class="featured-badge">
+                                        <i class="fas fa-star"></i>
+                                        Featured
+                                    </div>
+                                {% endif %}
+                                <div class="movie-duration">
+                                    <i class="fas fa-clock"></i>
+                                    {{ movie.date|timesince }}
+                                </div>
+                            </div>
+                            
+                            <div class="movie-info">
+                                <h3 class="movie-title">
+                                    <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+                                </h3>
+                                
+                                <div class="movie-meta">
+                                    <span class="movie-date">
+                                        <i class="fas fa-calendar"></i>
+                                        {{ movie.date|date:"M d, Y" }}
+                                    </span>
+                                    {% if movie.view_count %}
+                                        <span class="movie-views">
+                                            <i class="fas fa-eye"></i>
+                                            {{ movie.view_count|floatformat:0 }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if movie.excerpt %}
+                                    <p class="movie-excerpt">{{ movie.excerpt|truncatewords:12 }}</p>
+                                {% endif %}
+                                
+                                {% if movie.tags.exists %}
+                                    <div class="movie-tags">
+                                        {% for tag in movie.tags.all|slice:":3" %}
+                                            <span class="tag-badge">{{ tag.name }}</span>
+                                        {% endfor %}
+                                        {% if movie.tags.count > 3 %}
+                                            <span class="tag-badge more">+{{ movie.tags.count|add:"-3" }}</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-container">
+                <button class="load-more-btn" id="load-more-btn" style="display: none;">
+                    <i class="fas fa-plus-circle"></i>
+                    Load More Movies
+                </button>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1" class="page-btn">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="page-btn">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="page-btn active">{{ num }}</span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="page-btn">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-btn">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-category">
+                <div class="empty-icon">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+                <h3>No Movies Found</h3>
+                <p>This category doesn't have any movies yet.</p>
+                <a href="{% url 'movies:home' %}" class="back-btn">
+                    <i class="fas fa-home"></i>
+                    Browse All Movies
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Related Categories -->
+        {% if movies %}
+            <div class="related-section">
+                <h3 class="related-title">
+                    <i class="fas fa-tags"></i>
+                    Explore More Categories
+                </h3>
+                <div class="related-categories">
+                    <a href="{% url 'movies:all_categories' %}" class="category-link all-categories">
+                        <i class="fas fa-th-large"></i>
+                        <span>All Categories</span>
+                        <small>Browse everything</small>
+                    </a>
+                    <a href="{% url 'movies:home' %}" class="category-link featured">
+                        <i class="fas fa-star"></i>
+                        <span>Featured</span>
+                        <small>Editor's picks</small>
+                    </a>
+                    <a href="{% url 'movies:home' %}" class="category-link popular">
+                        <i class="fas fa-fire"></i>
+                        <span>Popular</span>
+                        <small>Most watched</small>
+                    </a>
+                    <a href="{% url 'movies:home' %}" class="category-link latest">
+                        <i class="fas fa-clock"></i>
+                        <span>Latest</span>
+                        <small>Just added</small>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+/* Category-specific styles */
+.category-hero {
+    background: var(--gradient-dark);
+    padding: clamp(40px, 8vh, 60px) 0;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.category-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+}
+
+.category-hero-content {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.category-icon {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    color: var(--primary-gold);
+    margin-bottom: clamp(15px, 3vh, 20px);
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.category-title {
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: clamp(20px, 4vh, 30px);
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: capitalize;
+    line-height: 1.1;
+}
+
+.category-stats {
+    display: flex;
+    justify-content: center;
+    gap: clamp(15px, 3vw, 25px);
+    flex-wrap: wrap;
+}
+
+.stat-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    padding: clamp(8px, 2vw, 12px) clamp(15px, 3vw, 20px);
+    border-radius: 25px;
+    color: var(--primary-gold);
+    font-weight: 500;
+    font-size: clamp(13px, 2.5vw, 16px);
+    backdrop-filter: blur(10px);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(30px, 6vh, 50px);
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.category-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.sort-select {
+    background: var(--medium-gray);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--white);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: clamp(13px, 2.5vw, 15px);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    outline: none;
+}
+
+.sort-select:focus {
+    border-color: var(--primary-gold);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.sort-select option {
+    background: var(--medium-gray);
+    color: var(--white);
+}
+
+.view-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.view-btn {
+    background: var(--medium-gray);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    color: var(--white);
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.view-btn:hover,
+.view-btn.active {
+    background: var(--gradient-red);
+    border-color: var(--primary-red);
+}
+
+.movie-quality {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: clamp(10px, 2vw, 12px);
+    font-weight: 700;
+}
+
+.featured-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--gradient-red);
+    color: var(--white);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: clamp(10px, 2vw, 12px);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.movie-duration {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--white);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: clamp(10px, 2vw, 12px);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(10px);
+}
+
+.movie-tags {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.tag-badge {
+    background: rgba(220, 38, 38, 0.15);
+    color: var(--text-gray);
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: clamp(10px, 1.8vw, 12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition-smooth);
+}
+
+.tag-badge:hover {
+    background: var(--primary-gold);
+    color: var(--primary-black);
+}
+
+.tag-badge.more {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    font-weight: 600;
+}
+
+.load-more-container {
+    text-align: center;
+    margin: clamp(30px, 6vh, 50px) 0;
+}
+
+.load-more-btn {
+    background: var(--gradient-red);
+    border: none;
+    color: var(--white);
+    padding: clamp(12px, 3vw, 15px) clamp(25px, 5vw, 35px);
+    border-radius: 25px;
+    font-size: clamp(14px, 3vw, 16px);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.load-more-btn:hover {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+}
+
+/* List View Styles */
+.movie-grid.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.movie-grid.list-view .movie-card {
+    display: flex;
+    max-height: 180px;
+}
+
+.movie-grid.list-view .movie-poster {
+    width: 280px;
+    flex-shrink: 0;
+}
+
+.movie-grid.list-view .movie-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(15px, 3vw, 20px);
+}
+
+/* Empty State */
+.empty-category {
+    text-align: center;
+    padding: clamp(60px, 12vh, 100px) 20px;
+    color: var(--text-gray);
+}
+
+.empty-icon {
+    font-size: clamp(4rem, 10vw, 6rem);
+    color: var(--primary-gold);
+    margin-bottom: clamp(25px, 5vh, 35px);
+    opacity: 0.7;
+}
+
+.empty-category h3 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: clamp(15px, 3vh, 20px);
+    color: var(--white);
+}
+
+.empty-category p {
+    font-size: clamp(14px, 3vw, 16px);
+    margin-bottom: clamp(30px, 6vh, 40px);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gradient-red);
+    color: var(--white);
+    padding: clamp(12px, 3vw, 15px) clamp(20px, 4vw, 25px);
+    border-radius: 25px;
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    font-weight: 600;
+    font-size: clamp(14px, 3vw, 16px);
+}
+
+.back-btn:hover {
+    background: var(--gradient-gold);
+    color: var(--primary-black);
+    transform: translateY(-2px);
+}
+
+/* Related Categories */
+.related-section {
+    margin-top: clamp(50px, 10vh, 80px);
+    padding-top: clamp(40px, 8vh, 60px);
+    border-top: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.related-title {
+    font-size: clamp(1.3rem, 3vw, 1.8rem);
+    font-weight: 600;
+    color: var(--primary-gold);
+    margin-bottom: clamp(25px, 5vh, 35px);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.related-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: clamp(15px, 3vw, 20px);
+}
+
+.category-link {
+    background: var(--light-gray);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+    border-radius: var(--border-radius);
+    padding: clamp(20px, 4vw, 25px);
+    text-decoration: none;
+    transition: var(--transition-smooth);
+    text-align: center;
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.category-link:hover {
+    border-color: var(--primary-gold);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2);
+}
+
+.category-link i {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--primary-gold);
+}
+
+.category-link span {
+    font-weight: 600;
+    font-size: clamp(14px, 3vw, 16px);
+}
+
+.category-link small {
+    color: var(--text-gray);
+    font-size: clamp(12px, 2vw, 14px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .category-controls {
+        justify-content: space-between;
+    }
+    
+    .movie-grid.list-view .movie-card {
+        flex-direction: column;
+        max-height: none;
+    }
+    
+    .movie-grid.list-view .movie-poster {
+        width: 100%;
+        aspect-ratio: 16/9;
+    }
+    
+    .related-categories {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .category-stats {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .related-categories {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sortSelect = document.getElementById('sort-select');
+    const moviesGrid = document.getElementById('movies-grid');
+    const viewBtns = document.querySelectorAll('.view-btn');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    
+    let currentMovies = Array.from(document.querySelectorAll('.movie-card'));
+    let displayedCount = currentMovies.length;
+    const moviesPerLoad = 12;
+    
+    // Sort functionality
+    if (sortSelect && moviesGrid) {
+        sortSelect.addEventListener('change', function() {
+            const sortType = this.value;
+            const movies = Array.from(moviesGrid.querySelectorAll('.movie-card'));
+            
+            movies.sort((a, b) => {
+                switch(sortType) {
+                    case 'newest':
+                        return new Date(b.dataset.date) - new Date(a.dataset.date);
+                    case 'oldest':
+                        return new Date(a.dataset.date) - new Date(b.dataset.date);
+                    case 'popular':
+                        return parseInt(b.dataset.views || 0) - parseInt(a.dataset.views || 0);
+                    case 'title':
+                        return a.dataset.title.localeCompare(b.dataset.title);
+                    case 'title-desc':
+                        return b.dataset.title.localeCompare(a.dataset.title);
+                    default:
+                        return 0;
+                }
+            });
+            
+            // Clear and re-append sorted movies
+            moviesGrid.innerHTML = '';
+            movies.forEach(movie => moviesGrid.appendChild(movie));
+            
+            // Save sort preference
+            try {
+                localStorage.setItem('category-sort-preference', sortType);
+            } catch(e) {
+                // localStorage not available
+            }
+        });
+        
+        // Restore sort preference
+        try {
+            const savedSort = localStorage.getItem('category-sort-preference');
+            if (savedSort) {
+                sortSelect.value = savedSort;
+                sortSelect.dispatchEvent(new Event('change'));
+            }
+        } catch(e) {
+            // localStorage not available
+        }
+    }
+    
+    // View toggle functionality
+    viewBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+            
+            // Update active state
+            viewBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update grid class
+            if (moviesGrid) {
+                moviesGrid.className = view === 'list' ? 'movie-grid list-view' : 'movie-grid';
+            }
+            
+            // Save view preference
+            try {
+                localStorage.setItem('category-view-preference', view);
+            } catch(e) {
+                // localStorage not available
+            }
+        });
+    });
+    
+    // Restore view preference
+    try {
+        const savedView = localStorage.getItem('category-view-preference');
+        if (savedView) {
+            const targetBtn = document.querySelector(`[data-view="${savedView}"]`);
+            if (targetBtn) {
+                targetBtn.click();
+            }
+        }
+    } catch(e) {
+        // localStorage not available
+    }
+    
+    // Load more functionality (if needed for very large categories)
+    if (loadMoreBtn && currentMovies.length > moviesPerLoad) {
+        // Initially hide excess movies
+        currentMovies.slice(moviesPerLoad).forEach(movie => {
+            movie.style.display = 'none';
+        });
+        loadMoreBtn.style.display = 'inline-flex';
+        
+        loadMoreBtn.addEventListener('click', function() {
+            const hiddenMovies = currentMovies.slice(displayedCount, displayedCount + moviesPerLoad);
+            hiddenMovies.forEach(movie => {
+                movie.style.display = 'block';
+            });
+            
+            displayedCount += moviesPerLoad;
+            
+            if (displayedCount >= currentMovies.length) {
+                loadMoreBtn.style.display = 'none';
+            }
+        });
+    }
+    
+    // Smooth scrolling for pagination links
+    document.querySelectorAll('.pagination a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            // Add loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            // Restore after a short delay (will be replaced by page load)
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 100);
+        });
+    });
+    
+    // Add intersection observer for lazy loading images
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                }
+            });
+        });
+        
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+});
+</script>
+{% endblock %}

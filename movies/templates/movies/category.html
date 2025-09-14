@@ -1,0 +1,1037 @@
+{% extends 'movies/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - BangXXX{% endblock %}
+
+{% block meta_description %}Watch {{ category.name }} movies on BangXXX. High-quality adult entertainment in the {{ category.name }} category.{% endblock %}
+
+{% block content %}
+<!-- Category Hero Section -->
+<section class="category-hero">
+    <div class="container">
+        <div class="category-header">
+            <div class="category-info">
+                <h1 class="category-title">{{ category.name }}</h1>
+                <p class="category-description">
+                    Explore our collection of {{ category.name|lower }} content. 
+                    High-quality videos and exclusive content in this category.
+                </p>
+                <div class="category-stats">
+                    <span class="stat-item">
+                        <i class="fas fa-video"></i>
+                        {{ movies.paginator.count }} video{{ movies.paginator.count|pluralize }}
+                    </span>
+                    <span class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        Premium Quality
+                    </span>
+                    <span class="stat-item">
+                        <i class="fas fa-download"></i>
+                        Free Downloads
+                    </span>
+                </div>
+            </div>
+            <div class="category-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filter and Sort Section -->
+<section class="filter-section">
+    <div class="container">
+        <div class="filter-controls">
+            <div class="filter-left">
+                <div class="view-toggle">
+                    <button class="view-btn active" data-view="grid">
+                        <i class="fas fa-th"></i>
+                        Grid
+                    </button>
+                    <button class="view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                        List
+                    </button>
+                </div>
+                <div class="results-count">
+                    Showing {{ movies.start_index }}-{{ movies.end_index }} of {{ movies.paginator.count }} results
+                </div>
+            </div>
+            <div class="filter-right">
+                <div class="sort-dropdown">
+                    <select id="sort-select" onchange="sortMovies()">
+                        <option value="latest">Latest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="title">Title A-Z</option>
+                        <option value="title-desc">Title Z-A</option>
+                    </select>
+                </div>
+                <button class="filter-btn" onclick="toggleFilters()">
+                    <i class="fas fa-filter"></i>
+                    Filters
+                </button>
+            </div>
+        </div>
+        
+        <!-- Advanced Filters Panel -->
+        <div class="filters-panel" id="filters-panel">
+            <div class="filters-content">
+                <div class="filter-group">
+                    <h4>Tags</h4>
+                    <div class="tag-filters">
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="hd">
+                            <span>HD Quality</span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="new">
+                            <span>New Releases</span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="popular">
+                            <span>Popular</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <h4>Duration</h4>
+                    <div class="duration-filters">
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="short">
+                            <span>Under 30 min</span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="medium">
+                            <span>30-60 min</span>
+                        </label>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" value="long">
+                            <span>Over 60 min</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="apply-filters-btn" onclick="applyFilters()">
+                        Apply Filters
+                    </button>
+                    <button class="clear-filters-btn" onclick="clearFilters()">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Movies Grid/List Section -->
+<section class="movies-section">
+    <div class="container">
+        <div class="movies-container" id="movies-container">
+            {% if movies %}
+            <div class="movie-grid" id="movie-grid">
+                {% for movie in movies %}
+                <div class="movie-card" data-id="{{ movie.id }}">
+                    <div class="movie-poster">
+                        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
+                             alt="{{ movie.title }}" 
+                             loading="lazy">
+                        <div class="movie-overlay">
+                            <button class="play-button" onclick="window.location.href='{{ movie.get_absolute_url }}'">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="movie-actions">
+                                <button class="action-btn favorite-btn" onclick="toggleFavorite({{ movie.id }})">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <button class="action-btn share-btn" onclick="shareMovie({{ movie.id }})">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="movie-badges">
+                            {% if movie.video_sources %}
+                            <span class="badge video-badge">
+                                <i class="fas fa-play"></i>
+                                HD
+                            </span>
+                            {% endif %}
+                            {% if movie.download_links %}
+                            <span class="badge download-badge">
+                                <i class="fas fa-download"></i>
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="movie-info">
+                        <h3 class="movie-title">
+                            <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+                        </h3>
+                        <div class="movie-meta">
+                            <span class="views">
+                                <i class="fas fa-eye"></i>
+                                {{ movie.view_count|default:0 }}
+                            </span>
+                            <span class="date">
+                                <i class="fas fa-calendar"></i>
+                                {{ movie.date|date:"M d, Y" }}
+                            </span>
+                        </div>
+                        {% if movie.tags.all %}
+                        <div class="movie-tags">
+                            {% for tag in movie.tags.all|slice:":3" %}
+                            <span class="tag">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-results">
+                <div class="no-results-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>No movies found</h3>
+                <p>No movies available in the {{ category.name }} category yet.</p>
+                <a href="{% url 'movies:home' %}" class="btn-primary">
+                    <i class="fas fa-home"></i>
+                    Back to Home
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if movies.has_other_pages %}
+        <div class="pagination-container">
+            <div class="pagination">
+                {% if movies.has_previous %}
+                <a href="?page=1" class="page-btn">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="?page={{ movies.previous_page_number }}" class="page-btn">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in movies.paginator.page_range %}
+                {% if movies.number == num %}
+                <span class="page-btn active">{{ num }}</span>
+                {% elif num > movies.number|add:'-3' and num < movies.number|add:'3' %}
+                <a href="?page={{ num }}" class="page-btn">{{ num }}</a>
+                {% endif %}
+                {% endfor %}
+                
+                {% if movies.has_next %}
+                <a href="?page={{ movies.next_page_number }}" class="page-btn">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ movies.paginator.num_pages }}" class="page-btn">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="pagination-info">
+                Page {{ movies.number }} of {{ movies.paginator.num_pages }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Load More Button for AJAX -->
+<div class="load-more-container" style="display: none;">
+    <button class="load-more-btn" id="load-more-btn">
+        <span class="btn-text">Load More Movies</span>
+        <span class="btn-loading hidden">
+            <span class="loading"></span>
+            Loading...
+        </span>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Category Hero */
+    .category-hero {
+        background: var(--gradient-dark);
+        padding: 120px 0 60px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .category-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.15) 0%, transparent 70%);
+    }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        z-index: 2;
+    }
+
+    .category-info {
+        flex: 1;
+    }
+
+    .category-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: var(--gradient-gold);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-transform: capitalize;
+    }
+
+    .category-description {
+        font-size: 1.2rem;
+        color: var(--text-gray);
+        margin-bottom: 30px;
+        max-width: 600px;
+        line-height: 1.6;
+    }
+
+    .category-stats {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--white);
+        font-weight: 600;
+    }
+
+    .stat-item i {
+        color: var(--primary-gold);
+        font-size: 1.1rem;
+    }
+
+    .category-icon {
+        font-size: 8rem;
+        color: rgba(255, 215, 0, 0.1);
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    /* Filter Section */
+    .filter-section {
+        background: var(--light-gray);
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .filter-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .filter-left, .filter-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .view-toggle {
+        display: flex;
+        background: var(--medium-gray);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .view-btn {
+        padding: 10px 15px;
+        border: none;
+        background: transparent;
+        color: var(--text-gray);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .view-btn.active {
+        background: var(--gradient-red);
+        color: var(--white);
+    }
+
+    .results-count {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+    }
+
+    .sort-dropdown select {
+        background: var(--medium-gray);
+        color: var(--white);
+        border: 1px solid rgba(220, 38, 38, 0.3);
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+
+    .filter-btn {
+        background: var(--gradient-gold);
+        color: var(--primary-black);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+    }
+
+    /* Filters Panel */
+    .filters-panel {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: var(--medium-gray);
+        border-radius: 0 0 15px 15px;
+    }
+
+    .filters-panel.show {
+        max-height: 300px;
+        padding: 20px 0;
+    }
+
+    .filters-content {
+        display: flex;
+        gap: 40px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group h4 {
+        color: var(--primary-gold);
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+
+    .tag-filters, .duration-filters {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .filter-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        color: var(--white);
+        font-size: 0.9rem;
+    }
+
+    .filter-checkbox input[type="checkbox"] {
+        accent-color: var(--primary-gold);
+    }
+
+    .filter-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-self: flex-end;
+    }
+
+    .apply-filters-btn, .clear-filters-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .apply-filters-btn {
+        background: var(--gradient-red);
+        color: var(--white);
+    }
+
+    .clear-filters-btn {
+        background: var(--medium-gray);
+        color: var(--text-gray);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .apply-filters-btn:hover, .clear-filters-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Movies Section */
+    .movies-section {
+        padding: 40px 0 80px;
+    }
+
+    .movie-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .movie-card:hover .movie-overlay {
+        opacity: 1;
+    }
+
+    .movie-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .movie-card:hover .movie-actions {
+        opacity: 1;
+    }
+
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(0, 0, 0, 0.7);
+        color: var(--white);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        background: var(--primary-gold);
+        color: var(--primary-black);
+        transform: scale(1.1);
+    }
+
+    .movie-badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .video-badge {
+        background: var(--gradient-red);
+        color: var(--white);
+    }
+
+    .download-badge {
+        background: var(--gradient-gold);
+        color: var(--primary-black);
+    }
+
+    .movie-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .tag {
+        background: rgba(220, 38, 38, 0.2);
+        color: var(--primary-gold);
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+
+    /* List View */
+    .movie-grid.list-view {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .movie-grid.list-view .movie-card {
+        display: flex;
+        background: var(--light-gray);
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid rgba(220, 38, 38, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .movie-grid.list-view .movie-card:hover {
+        transform: translateX(5px);
+        border-color: var(--primary-gold);
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2);
+    }
+
+    .movie-grid.list-view .movie-poster {
+        flex: 0 0 200px;
+        aspect-ratio: 16/9;
+    }
+
+    .movie-grid.list-view .movie-info {
+        flex: 1;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .movie-grid.list-view .movie-title {
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+
+    .movie-grid.list-view .movie-meta {
+        margin-bottom: 15px;
+        gap: 20px;
+    }
+
+    /* No Results */
+    .no-results {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--text-gray);
+    }
+
+    .no-results-icon {
+        font-size: 4rem;
+        color: var(--primary-gold);
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .no-results h3 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: var(--white);
+    }
+
+    .no-results p {
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 50px;
+    }
+
+    .pagination-info {
+        color: var(--text-gray);
+        font-size: 0.9rem;
+    }
+
+    /* Load More */
+    .load-more-container {
+        text-align: center;
+        padding: 40px 0;
+    }
+
+    .load-more-btn {
+        background: var(--gradient-red);
+        color: var(--white);
+        border: none;
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .load-more-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .category-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 30px;
+        }
+
+        .category-title {
+            font-size: 2.5rem;
+        }
+
+        .category-icon {
+            font-size: 4rem;
+        }
+
+        .filter-controls {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+        }
+
+        .filter-left, .filter-right {
+            justify-content: space-between;
+        }
+
+        .filters-content {
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .filter-actions {
+            align-self: stretch;
+        }
+
+        .movie-grid.list-view .movie-card {
+            flex-direction: column;
+        }
+
+        .movie-grid.list-view .movie-poster {
+            flex: 0 0 auto;
+            aspect-ratio: 16/9;
+        }
+
+        .pagination {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentPage = {{ movies.number }};
+    let totalPages = {{ movies.paginator.num_pages }};
+    let categorySlug = '{{ category.slug }}';
+    let currentView = 'grid';
+    let currentSort = 'latest';
+
+    // Toggle view between grid and list
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const view = btn.dataset.view;
+            toggleView(view);
+        });
+    });
+
+    function toggleView(view) {
+        currentView = view;
+        const movieGrid = document.getElementById('movie-grid');
+        const viewBtns = document.querySelectorAll('.view-btn');
+
+        // Update active button
+        viewBtns.forEach(btn => {
+            if (btn.dataset.view === view) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Update grid class
+        if (view === 'list') {
+            movieGrid.classList.add('list-view');
+        } else {
+            movieGrid.classList.remove('list-view');
+        }
+
+        // Save preference
+        localStorage.setItem('preferred_view', view);
+    }
+
+    // Load saved view preference
+    const savedView = localStorage.getItem('preferred_view');
+    if (savedView) {
+        toggleView(savedView);
+    }
+
+    // Toggle filters panel
+    function toggleFilters() {
+        const panel = document.getElementById('filters-panel');
+        panel.classList.toggle('show');
+    }
+
+    // Sort movies
+    function sortMovies() {
+        const sortSelect = document.getElementById('sort-select');
+        const sortValue = sortSelect.value;
+        currentSort = sortValue;
+
+        // Build URL with sort parameter
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortValue);
+        url.searchParams.delete('page'); // Reset to first page
+        
+        window.location.href = url.toString();
+    }
+
+    // Apply filters
+    function applyFilters() {
+        const checkedFilters = [];
+        document.querySelectorAll('.filter-checkbox input:checked').forEach(input => {
+            checkedFilters.push(input.value);
+        });
+
+        // Build URL with filter parameters
+        const url = new URL(window.location);
+        if (checkedFilters.length > 0) {
+            url.searchParams.set('filters', checkedFilters.join(','));
+        } else {
+            url.searchParams.delete('filters');
+        }
+        url.searchParams.delete('page'); // Reset to first page
+        
+        window.location.href = url.toString();
+    }
+
+    // Clear all filters
+    function clearFilters() {
+        document.querySelectorAll('.filter-checkbox input').forEach(input => {
+            input.checked = false;
+        });
+        
+        // Remove filters from URL
+        const url = new URL(window.location);
+        url.searchParams.delete('filters');
+        url.searchParams.delete('page');
+        
+        window.location.href = url.toString();
+    }
+
+    // Toggle favorite
+    function toggleFavorite(movieId) {
+        const btn = document.querySelector(`.favorite-btn[onclick*="${movieId}"]`);
+        const icon = btn.querySelector('i');
+        
+        // Simulate API call
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            if (icon.classList.contains('far')) {
+                icon.className = 'fas fa-heart';
+                btn.style.background = 'var(--gradient-red)';
+                showNotification('Added to favorites!', 'success');
+            } else {
+                icon.className = 'far fa-heart';
+                btn.style.background = 'rgba(0, 0, 0, 0.7)';
+                showNotification('Removed from favorites!', 'info');
+            }
+            btn.disabled = false;
+        }, 500);
+    }
+
+    // Share movie
+    function shareMovie(movieId) {
+        // Get movie data
+        const movieCard = document.querySelector(`.movie-card[data-id="${movieId}"]`);
+        const movieTitle = movieCard.querySelector('.movie-title a').textContent;
+        const movieUrl = movieCard.querySelector('.movie-title a').href;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: movieTitle,
+                text: `Check out "${movieTitle}" on BangXXX`,
+                url: movieUrl
+            });
+        } else {
+            // Fallback - copy to clipboard
+            navigator.clipboard.writeText(movieUrl).then(() => {
+                showNotification('Movie link copied to clipboard!', 'success');
+            });
+        }
+    }
+
+    // Infinite scroll / Load more
+    let isLoading = false;
+
+    function loadMoreMovies() {
+        if (isLoading || currentPage >= totalPages) return;
+        
+        isLoading = true;
+        const loadBtn = document.getElementById('load-more-btn');
+        const btnText = loadBtn.querySelector('.btn-text');
+        const btnLoading = loadBtn.querySelector('.btn-loading');
+        
+        btnText.classList.add('hidden');
+        btnLoading.classList.remove('hidden');
+        
+        // Simulate loading more content
+        setTimeout(() => {
+            currentPage++;
+            // In a real implementation, you would fetch more movies here
+            
+            isLoading = false;
+            btnText.classList.remove('hidden');
+            btnLoading.classList.add('hidden');
+            
+            if (currentPage >= totalPages) {
+                loadBtn.style.display = 'none';
+                showNotification('All movies loaded!', 'info');
+            }
+        }, 2000);
+    }
+
+    // Lazy loading for images
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src || img.src;
+                    img.classList.remove('lazy');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        switch(e.key) {
+            case 'g':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    toggleView('grid');
+                }
+                break;
+            case 'l':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    toggleView('list');
+                }
+                break;
+            case 'f':
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    toggleFilters();
+                }
+                break;
+        }
+    });
+
+    // Show notification function
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Initialize filters from URL
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Set sort value
+        const sortValue = urlParams.get('sort');
+        if (sortValue) {
+            document.getElementById('sort-select').value = sortValue;
+        }
+        
+        // Set filter checkboxes
+        const filters = urlParams.get('filters');
+        if (filters) {
+            const filterArray = filters.split(',');
+            filterArray.forEach(filter => {
+                const checkbox = document.querySelector(`input[value="${filter}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+            
+            // Show filters panel if filters are active
+            document.getElementById('filters-panel').classList.add('show');
+        }
+        
+        // Add animation to movie cards
+        const movieCards = document.querySelectorAll('.movie-card');
+        movieCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'all 0.6s ease';
+            
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}
