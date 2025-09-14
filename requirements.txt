@@ -13,7 +13,6 @@ redis==5.0.1
 django-redis==5.4.0
 django-extensions==3.2.3
 python-slugify==8.0.1
-Pillow==10.1.0
 django-cleanup==8.0.0
 celery==5.3.4
 django-celery-beat==2.5.0
