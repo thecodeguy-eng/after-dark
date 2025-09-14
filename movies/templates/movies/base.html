@@ -921,6 +921,156 @@
     {% block extra_css %}{% endblock %}
 </head>
 
+<!-- Age Verification  -->
+
+<style>
+#age-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+}
+
+#age-popup.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.age-box {
+    background: #1a1a1a;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 400px;
+    border: 2px solid #ffd700;
+}
+
+.age-box h2 {
+    color: #ffd700;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.age-box p {
+    color: #fff;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.age-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.age-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-yes {
+    background: #ffd700;
+    color: #000;
+}
+
+.btn-no {
+    background: #dc2626;
+    color: #fff;
+}
+
+.age-btn:hover {
+    opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+    .age-box {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .age-buttons {
+        flex-direction: column;
+    }
+    
+    .age-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<!-- Age Verification HTML -->
+<div id="age-popup">
+    <div class="age-box">
+        <h2>🔞 Age Verification</h2>
+        <p>You must be 18 or older to access this site.<br>
+        Are you 18 years of age or older?</p>
+        
+        <div class="age-buttons">
+            <button class="age-btn btn-yes" onclick="ageConfirm(true)">
+                Yes, I'm 18+
+            </button>
+            <button class="age-btn btn-no" onclick="ageConfirm(false)">
+                No, Under 18
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple Age Verification
+function showAgePopup() {
+    // Check if already verified
+    if (localStorage.getItem('age_ok') === 'yes') {
+        return; // Don't show popup
+    }
+    
+    // Show popup
+    document.getElementById('age-popup').classList.add('show');
+    document.body.style.overflow = 'hidden'; // Disable scrolling
+}
+
+function ageConfirm(isAdult) {
+    if (isAdult) {
+        // User is 18+
+        localStorage.setItem('age_ok', 'yes');
+        document.getElementById('age-popup').style.display = 'none';
+        document.body.style.overflow = '';
+        
+        // Redirect to home page
+        if (window.location.pathname !== '/') {
+            window.location.href = '/';
+        }
+    } else {
+        // User is under 18
+        localStorage.removeItem('age_ok');
+        alert('You must be 18 or older to access this site.');
+        window.location.href = 'https://www.google.com';
+    }
+}
+
+// Show popup when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    showAgePopup();
+});
+
+// Reset function for testing (type resetAge() in console)
+function resetAge() {
+    localStorage.removeItem('age_ok');
+    location.reload();
+}
+</script>
+
+<!-- End Age Verification  -->
+
 <body>
     <!-- Mobile backdrop -->
     <div class="mobile-backdrop" id="mobile-backdrop"></div>

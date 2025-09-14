@@ -8,6 +8,11 @@ from django.views.generic import ListView, DetailView
 from .models import Movie, Category, Tag, Series, Episode
 import json
 
+
+def ping_view(request):
+    return JsonResponse({"status": "OK"})
+
+
 def custom_404_view(request, exception):
     """
     Custom 404 view that shows only specific categories

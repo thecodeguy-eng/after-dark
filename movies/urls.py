@@ -5,6 +5,8 @@ from . import views
 app_name = 'movies'
 
 urlpatterns = [
+    path('ping/', views.ping_view, name='ping'),
+
     path('', views.HomeView.as_view(), name='home'),
     path('search/', views.search_view, name='search'),
     path('categories/', views.AllCategoriesView.as_view(), name='all_categories'),

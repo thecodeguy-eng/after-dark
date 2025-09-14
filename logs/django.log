@@ -19212,3 +19212,48 @@ INFO 2025-09-14 20:55:51,082 basehttp 10684 33700 "GET /watch/mujin-eki-the-anim
 INFO 2025-09-14 20:56:48,054 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85290
 INFO 2025-09-14 20:57:52,739 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85290
 INFO 2025-09-14 20:59:23,182 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85299
+INFO 2025-09-14 21:01:54,961 autoreload 19736 38132 Watching for file changes with StatReloader
+INFO 2025-09-14 21:02:20,879 basehttp 19736 33000 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85519
+INFO 2025-09-14 21:02:53,431 basehttp 19736 33000 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85439
+INFO 2025-09-14 21:04:13,518 basehttp 19736 33000 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85609
+INFO 2025-09-14 21:04:50,982 basehttp 19736 33000 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85656
+INFO 2025-09-14 21:05:45,882 basehttp 19736 33000 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85474
+INFO 2025-09-14 21:06:17,508 basehttp 19736 33000 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85461
+INFO 2025-09-14 21:07:29,434 basehttp 19736 33000 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85470
+INFO 2025-09-14 21:34:59,522 autoreload 36176 37196 Watching for file changes with StatReloader
+INFO 2025-09-14 21:35:34,621 autoreload 19536 9872 Watching for file changes with StatReloader
+INFO 2025-09-14 21:37:47,862 basehttp 19536 12688 "GET / HTTP/1.1" 200 130445
+INFO 2025-09-14 21:39:20,627 basehttp 19536 29448 "GET / HTTP/1.1" 200 147665
+INFO 2025-09-14 21:39:38,262 basehttp 19536 29448 "GET / HTTP/1.1" 200 147665
+INFO 2025-09-14 21:39:55,848 basehttp 19536 29448 "GET / HTTP/1.1" 200 147665
+INFO 2025-09-14 21:40:16,776 basehttp 19536 29448 "GET / HTTP/1.1" 200 130445
+INFO 2025-09-14 21:41:45,720 basehttp 19536 29448 "GET / HTTP/1.1" 200 133465
+INFO 2025-09-14 21:41:59,490 basehttp 19536 38144 "GET / HTTP/1.1" 200 133465
+INFO 2025-09-14 21:41:59,500 basehttp 19536 29448 - Broken pipe from ('127.0.0.1', 56348)
+INFO 2025-09-14 21:41:59,837 basehttp 19536 38144 "GET /static/img/no-bg-logo.png HTTP/1.1" 200 100163
+INFO 2025-09-14 21:42:00,121 basehttp 19536 38016 - Broken pipe from ('127.0.0.1', 56386)
+INFO 2025-09-14 21:42:08,682 basehttp 19536 38144 "GET /static/img/logo.jpg HTTP/1.1" 200 26045
+INFO 2025-09-14 21:45:45,883 autoreload 16248 10996 Watching for file changes with StatReloader
+INFO 2025-09-14 21:45:54,526 basehttp 16248 20568 code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x06à\x01\x00\x06Ü\x03\x03Á(º')
+ERROR 2025-09-14 21:45:54,534 basehttp 16248 20568 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 21:45:54,562 basehttp 16248 33000 code 400, message Bad request version ('\x02h2\x08http/1.1\x00')
+ERROR 2025-09-14 21:45:54,566 basehttp 16248 33000 You're accessing the development server over HTTPS, but it only supports HTTP.
+WARNING 2025-09-14 21:45:55,948 log 16248 39420 Not Found: /sw.js
+WARNING 2025-09-14 21:45:55,949 basehttp 16248 39420 "GET /sw.js HTTP/1.1" 404 4149
+INFO 2025-09-14 21:46:08,980 basehttp 16248 25964 code 400, message Bad request version ("×\x1bçíÈb\x08ñU\x9f\x12¿Î\x8f'DJóê\x00")
+ERROR 2025-09-14 21:46:08,982 basehttp 16248 25964 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 21:46:08,986 basehttp 16248 37452 code 400, message Bad request version ('\x9aÆ?{\x81P\x90B\'}\x8aY°¥eÇ`\xad"É\x04_Sbû<?o')
+ERROR 2025-09-14 21:46:08,989 basehttp 16248 37452 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 21:46:10,764 basehttp 16248 36072 code 400, message Bad request syntax ('\x16\x03\x01\x07\x00\x01\x00\x06ü\x03\x03#\x8bÀg¹\x98<\x9c8\x02¸Î\x81×~A\x1a:¬\x92Eµf¬Î\x12Wë¡')
+ERROR 2025-09-14 21:46:10,767 basehttp 16248 36072 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 21:46:10,765 basehttp 16248 38980 code 400, message Bad request version ('1.çðÍ¢\x17}\x92')
+ERROR 2025-09-14 21:46:10,776 basehttp 16248 38980 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 21:46:10,777 basehttp 16248 332 code 400, message Bad request version ('³ò+\x93\x11$Y\x9c')
+ERROR 2025-09-14 21:46:10,787 basehttp 16248 332 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 21:46:10,789 basehttp 16248 10708 code 400, message Bad request version ("\x9ad\x8e\x01Ø'láQ")
+ERROR 2025-09-14 21:46:10,790 basehttp 16248 10708 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 21:47:00,393 basehttp 16248 39508 "GET / HTTP/1.1" 200 133447
+INFO 2025-09-14 21:47:00,855 basehttp 16248 39508 "GET /static/img/no-bg-logo.png HTTP/1.1" 200 100163
+INFO 2025-09-14 21:47:22,485 basehttp 16248 39508 "GET /ping/ HTTP/1.1" 200 16
+WARNING 2025-09-14 21:47:22,609 log 16248 39508 Not Found: /favicon.ico
+WARNING 2025-09-14 21:47:22,610 basehttp 16248 39508 "GET /favicon.ico HTTP/1.1" 404 4167
