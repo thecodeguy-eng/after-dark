@@ -57,7 +57,7 @@
                             {% endif %}
                             <div class="meta-item">
                                 <i class="fas fa-star"></i>
-                                <span>{{ movie.view_count|calc_rating }}/5</span>
+                                <!-- <span>{{ movie.view_count|calc_rating }}/5</span> -->
                             </div>
                         </div>
                         
@@ -88,13 +88,6 @@
                             </button>
                             {% endif %}
                             
-                            {% if movie.download_links %}
-                            <button class="btn-download" onclick="toggleDownloads()">
-                                <i class="fas fa-download"></i>
-                                Download
-                            </button>
-                            {% endif %}
-                            
                             <button class="btn-favorite" onclick="toggleFavorite({{ movie.id }})">
                                 <i class="far fa-heart"></i>
                                 Favorite
@@ -104,6 +97,10 @@
                                 <i class="fas fa-share-alt"></i>
                                 Share
                             </button>
+                            
+                            <div class="download-info-text">
+                                <small><i class="fas fa-info-circle"></i> To download, click the 3 dots in the video player</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -119,7 +116,7 @@
                 <div class="player-header">
                     <h2 class="player-title">{{ movie.title }}</h2>
                     <div class="player-controls">
-                        {% if movie.video_sources|length > 1 %}
+                        <!-- {% if movie.video_sources|length > 1 %}
                         <div class="source-selector">
                             <label for="source-select" class="sr-only">Select video source</label>
                             <select id="source-select" onchange="changeVideoSource()">
@@ -130,7 +127,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        {% endif %}
+                        {% endif %} -->
                         <button class="fullscreen-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen">
                             <i class="fas fa-expand"></i>
                         </button>
@@ -150,14 +147,13 @@
                             src="{{ source.url }}" 
                             frameborder="0" 
                             allowfullscreen
-                            allow="autoplay; fullscreen"
-                            style="display: none;">
+                            allow="autoplay; fullscreen">
                     </iframe>
                     {% else %}
                     <video id="video-player-element" 
                            controls 
                            preload="metadata"
-                           style="display: none;">
+                           autoplay>
                         <source src="{{ source.url }}" type="{{ source.type|default:'video/mp4' }}">
                         Your browser does not support the video tag.
                     </video>
@@ -176,38 +172,6 @@
                         <span>{{ movie.date|date:"M d, Y" }}</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-    {% endif %}
-
-    <!-- Download Section -->
-    {% if movie.download_links %}
-    <section class="download-section" id="download-section" style="display: none;">
-        <div class="container">
-            <h2 class="section-title">
-                <i class="fas fa-download"></i>
-                Download Links
-            </h2>
-            <div class="download-grid">
-                {% for link in movie.download_links %}
-                <div class="download-card">
-                    <div class="download-icon">
-                        <i class="fas fa-file-video"></i>
-                    </div>
-                    <div class="download-info">
-                        <h4>{{ link.label|default:"Download Link" }}</h4>
-                        <p class="download-meta">
-                            {% if link.size %}{{ link.size }} • {% endif %}
-                            High Quality Download
-                        </p>
-                    </div>
-                    <a href="{{ link.url }}" class="download-btn" target="_blank" rel="noopener">
-                        <i class="fas fa-download"></i>
-                        Download
-                    </a>
-                </div>
-                {% endfor %}
             </div>
         </div>
     </section>
@@ -316,9 +280,9 @@
                         <i class="fab fa-facebook-f"></i>
                         Facebook
                     </a>
-                    <a href="#" class="share-btn twitter" onclick="shareOn('twitter')" data-platform="twitter">
-                        <i class="fab fa-twitter"></i>
-                        Twitter
+                    <a href="#" class="share-btn x" onclick="shareOn('x')" data-platform="x">
+                        <i class="fab fa-x"></i>
+                        <!-- X -->
                     </a>
                     <a href="#" class="share-btn whatsapp" onclick="shareOn('whatsapp')" data-platform="whatsapp">
                         <i class="fab fa-whatsapp"></i>
@@ -344,6 +308,154 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-load video when page loads
+    const videoElement = document.getElementById('video-player-element');
+    const videoFrame = document.getElementById('video-frame');
+    const videoLoading = document.getElementById('video-loading');
+    
+    // Function to show video and hide loading
+    function showVideo() {
+        if (videoLoading) {
+            videoLoading.style.display = 'none';
+        }
+        if (videoElement) {
+            videoElement.style.display = 'block';
+            // Try to load the video
+            videoElement.load();
+        }
+        if (videoFrame) {
+            videoFrame.style.display = 'block';
+        }
+    }
+    
+    // Show video immediately
+    showVideo();
+    
+    // If video element exists, handle loading events
+    if (videoElement) {
+        videoElement.addEventListener('loadedmetadata', function() {
+            if (videoLoading) {
+                videoLoading.style.display = 'none';
+            }
+        });
+        
+        videoElement.addEventListener('error', function() {
+            console.log('Video failed to load');
+            if (videoLoading) {
+                videoLoading.innerHTML = '<p>Failed to load video. Please try again.</p>';
+            }
+        });
+    }
+});
+
+function scrollToPlayer() {
+    document.getElementById('video-player').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+function changeVideoSource() {
+    const selector = document.getElementById('source-select');
+    const selectedOption = selector.options[selector.selectedIndex];
+    const videoElement = document.getElementById('video-player-element');
+    const videoFrame = document.getElementById('video-frame');
+    const videoLoading = document.getElementById('video-loading');
+    
+    if (videoLoading) {
+        videoLoading.style.display = 'flex';
+    }
+    
+    const url = selectedOption.dataset.url;
+    const type = selectedOption.dataset.type;
+    
+    if (type.includes('iframe') || url.includes('embed')) {
+        if (videoElement) videoElement.style.display = 'none';
+        if (videoFrame) {
+            videoFrame.src = url;
+            videoFrame.style.display = 'block';
+            if (videoLoading) videoLoading.style.display = 'none';
+        }
+    } else {
+        if (videoFrame) videoFrame.style.display = 'none';
+        if (videoElement) {
+            videoElement.src = url;
+            videoElement.style.display = 'block';
+            videoElement.load();
+        }
+    }
+}
+
+function toggleFullscreen() {
+    const videoWrapper = document.getElementById('video-wrapper');
+    if (!document.fullscreenElement) {
+        videoWrapper.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function toggleFavorite(movieId) {
+    // Add your favorite functionality here
+    console.log('Toggle favorite for movie:', movieId);
+}
+
+function showShareModal() {
+    document.getElementById('share-modal').style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+function shareOn(platform) {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(document.title);
+    
+    let shareUrl;
+    switch(platform) {
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+            break;
+        case 'x':
+            shareUrl = `https://x.com/intent/tweet?url=${url}&text=${title}`;
+            break;
+        case 'whatsapp':
+            shareUrl = `https://wa.me/?text=${title} ${url}`;
+            break;
+        case 'telegram':
+            shareUrl = `https://t.me/share/url?url=${url}&text=${title}`;
+            break;
+    }
+    
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+}
+
+function copyToClipboard() {
+    const copyText = document.getElementById('share-url-input');
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    
+    const copyBtn = document.querySelector('.copy-btn');
+    const originalContent = copyBtn.innerHTML;
+    copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+    copyBtn.style.background = 'var(--primary-gold)';
+    copyBtn.style.color = 'var(--primary-black)';
+    
+    setTimeout(() => {
+        copyBtn.innerHTML = originalContent;
+        copyBtn.style.background = '';
+        copyBtn.style.color = '';
+    }, 2000);
+}
+</script>
 {% endblock %}
 
 {% block extra_css %}
@@ -574,9 +686,10 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
+    align-items: center;
 }
 
-.btn-watch, .btn-download, .btn-favorite, .btn-share {
+.btn-watch, .btn-favorite, .btn-share {
     padding: 0.875rem 1.75rem;
     border-radius: 50px;
     border: none;
@@ -597,12 +710,6 @@
     box-shadow: var(--shadow-light);
 }
 
-.btn-download {
-    background: var(--gradient-gold);
-    color: var(--primary-black);
-    box-shadow: var(--shadow-light);
-}
-
 .btn-favorite, .btn-share {
     background: rgba(255, 255, 255, 0.1);
     color: var(--white);
@@ -610,7 +717,7 @@
     backdrop-filter: blur(10px);
 }
 
-.btn-watch:hover, .btn-download:hover {
+.btn-watch:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-medium);
 }
@@ -623,6 +730,24 @@
 .btn-share:hover {
     background: rgba(79, 70, 229, 0.8);
     border-color: #4f46e5;
+}
+
+/* Download Info Text */
+.download-info-text {
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.download-info-text small {
+    color: var(--text-gray);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.download-info-text i {
+    color: var(--primary-gold);
 }
 
 /* Video Player Section */
@@ -769,17 +894,24 @@
     opacity: 0.5;
 }
 
-/* Download Section */
-.download-section {
+/* Episodes Section */
+.episodes-section {
     padding: 4rem 0;
     background: var(--light-gray);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
 }
 
 .section-title {
     font-size: 2rem;
     font-weight: 700;
     color: var(--white);
-    margin-bottom: 2rem;
+    margin: 0;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -789,102 +921,14 @@
     color: var(--primary-gold);
 }
 
-.download-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 1.5rem;
-}
-
-.download-card {
-    background: var(--medium-gray);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: var(--transition-smooth);
-}
-
-.download-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-medium);
-    border-color: var(--primary-gold);
-}
-
-.download-icon {
-    font-size: 2.5rem;
-    color: var(--primary-gold);
-    background: rgba(255, 215, 0, 0.1);
-    padding: 1rem;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.download-info {
-    flex: 1;
-}
-
-.download-info h4 {
-    color: var(--white);
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.download-meta {
+.episode-info {
     color: var(--text-gray);
-    font-size: 0.9rem;
-    margin: 0;
-}
-
-.download-btn {
-    background: var(--gradient-red);
-    color: var(--white);
-    padding: 0.875rem 1.5rem;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: var(--transition-smooth);
-    flex-shrink: 0;
-    box-shadow: var(--shadow-light);
-}
-
-.download-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-}
-
-/* Episodes Section */
-.episodes-section {
-    padding: 4rem 0;
-    background: var(--primary-black);
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.episode-info .current-episode {
-    background: var(--gradient-gold);
-    color: var(--primary-black);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
 }
 
 .episodes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1.5rem;
 }
 
@@ -892,19 +936,20 @@
     background: var(--medium-gray);
     border-radius: var(--border-radius);
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: var(--transition-smooth);
-    border: 2px solid transparent;
+    position: relative;
+}
+
+.episode-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+    border-color: var(--primary-gold);
 }
 
 .episode-card.current-episode {
-    border-color: var(--primary-gold);
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-}
-
-.episode-card:hover:not(.current-episode) {
-    transform: translateY(-5px);
     border-color: var(--primary-red);
-    box-shadow: var(--shadow-medium);
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
 }
 
 .episode-poster {
@@ -938,20 +983,15 @@
     opacity: 1;
 }
 
-.episode-card:hover .episode-poster img {
-    transform: scale(1.1);
-}
-
 .episode-play-btn {
-    background: var(--gradient-gold);
-    border-radius: 50%;
+    background: var(--gradient-red);
+    color: var(--white);
     width: 50px;
     height: 50px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary-black);
-    font-size: 18px;
     text-decoration: none;
     transition: var(--transition-smooth);
 }
@@ -962,17 +1002,17 @@
 
 .current-badge {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: var(--gradient-gold);
-    color: var(--primary-black);
+    top: 10px;
+    right: 10px;
+    background: var(--gradient-red);
+    color: var(--white);
     padding: 0.5rem 1rem;
     border-radius: 20px;
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
 }
 
 .episode-info {
@@ -981,34 +1021,32 @@
 
 .episode-title {
     color: var(--white);
+    font-size: 1.1rem;
+    font-weight: 700;
     margin-bottom: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
 }
 
 .episode-name {
     color: var(--text-light);
-    margin-bottom: 0.75rem;
     font-size: 0.9rem;
+    margin-bottom: 0.5rem;
     line-height: 1.4;
-    margin: 0 0 0.75rem 0;
 }
 
 .episode-date {
-    color: var(--primary-gold);
+    color: var(--text-gray);
     font-size: 0.8rem;
-    font-weight: 600;
 }
 
 /* Related Section */
 .related-section {
     padding: 4rem 0;
-    background: var(--light-gray);
+    background: var(--dark-gray);
 }
 
 .related-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
 }
 
@@ -1016,19 +1054,19 @@
     background: var(--medium-gray);
     border-radius: var(--border-radius);
     overflow: hidden;
-    transition: var(--transition-smooth);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition-smooth);
 }
 
 .related-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-medium);
-    border-color: rgba(255, 215, 0, 0.3);
+    border-color: var(--primary-gold);
 }
 
 .related-poster {
     position: relative;
-    aspect-ratio: 16/9;
+    aspect-ratio: 2/3;
     overflow: hidden;
 }
 
@@ -1057,20 +1095,15 @@
     opacity: 1;
 }
 
-.related-card:hover .related-poster img {
-    transform: scale(1.1);
-}
-
 .related-play-btn {
-    background: var(--gradient-gold);
-    border-radius: 50%;
+    background: var(--gradient-red);
+    color: var(--white);
     width: 50px;
     height: 50px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary-black);
-    font-size: 18px;
     text-decoration: none;
     transition: var(--transition-smooth);
 }
@@ -1080,19 +1113,20 @@
 }
 
 .related-info {
-    padding: 1.25rem;
+    padding: 1rem;
 }
 
 .related-title {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .related-title a {
     color: var(--white);
     text-decoration: none;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     line-height: 1.3;
+    display: block;
     transition: var(--transition-smooth);
 }
 
@@ -1103,54 +1137,46 @@
 .related-meta {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
     color: var(--text-gray);
-    font-size: 0.85rem;
 }
 
-.related-meta .views {
+.views {
     display: flex;
     align-items: center;
     gap: 0.25rem;
 }
 
-/* Modal */
+/* Modal Styles */
 .modal {
     display: none;
     position: fixed;
-    top: 0;
+    z-index: 1000;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    z-index: 1000;
-}
-
-.modal.show {
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .modal-backdrop {
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(5px);
 }
 
 .modal-content {
+    position: relative;
     background: var(--light-gray);
+    margin: 5% auto;
+    padding: 0;
     border-radius: var(--border-radius);
-    max-width: 500px;
     width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
+    max-width: 500px;
     box-shadow: var(--shadow-heavy);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    position: relative;
-    z-index: 1;
 }
 
 .modal-header {
@@ -1163,9 +1189,8 @@
 
 .modal-header h3 {
     color: var(--white);
-    font-size: 1.25rem;
-    font-weight: 600;
     margin: 0;
+    font-size: 1.25rem;
 }
 
 .close-modal {
@@ -1174,14 +1199,14 @@
     color: var(--text-gray);
     font-size: 1.5rem;
     cursor: pointer;
-    transition: var(--transition-smooth);
     padding: 0.5rem;
     border-radius: 50%;
+    transition: var(--transition-smooth);
 }
 
 .close-modal:hover {
-    color: var(--primary-red);
-    background: rgba(220, 38, 38, 0.1);
+    background: var(--medium-gray);
+    color: var(--white);
 }
 
 .modal-body {
@@ -1199,32 +1224,33 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem 1.25rem;
+    padding: 0.875rem 1.25rem;
     border-radius: var(--border-radius-small);
     text-decoration: none;
     font-weight: 600;
     transition: var(--transition-smooth);
-    justify-content: center;
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .share-btn.facebook {
     background: #1877f2;
-    color: white;
+    border-color: #1877f2;
 }
 
-.share-btn.twitter {
-    background: #1da1f2;
-    color: white;
+.share-btn.x {
+    background: #01111b;
+    border-color: #f7f8f8;
 }
 
 .share-btn.whatsapp {
     background: #25d366;
-    color: white;
+    border-color: #25d366;
 }
 
 .share-btn.telegram {
     background: #0088cc;
-    color: white;
+    border-color: #0088cc;
 }
 
 .share-btn:hover {
@@ -1232,496 +1258,114 @@
     box-shadow: var(--shadow-light);
 }
 
-.share-link {
-    margin-top: 1.5rem;
-}
-
 .share-link label {
-    display: block;
     color: var(--white);
-    margin-bottom: 0.75rem;
     font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
 }
 
 .input-group {
     display: flex;
-    gap: 0.5rem;
+    border-radius: var(--border-radius-small);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .input-group input {
     flex: 1;
     background: var(--medium-gray);
-    border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--white);
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius-small);
+    border: none;
+    padding: 0.875rem 1rem;
     font-size: 0.9rem;
 }
 
+.input-group input:focus {
+    outline: none;
+    background: var(--dark-gray);
+}
+
 .copy-btn {
-    background: var(--gradient-gold);
-    color: var(--primary-black);
+    background: var(--gradient-red);
+    color: var(--white);
     border: none;
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius-small);
+    padding: 0.875rem 1rem;
     cursor: pointer;
-    font-weight: 600;
     transition: var(--transition-smooth);
+    font-weight: 600;
 }
 
 .copy-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-light);
-}
-
-/* Screen Reader Only */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    background: var(--primary-gold);
+    color: var(--primary-black);
 }
 
 /* Responsive Design */
-@media (max-width: 1200px) {
-    .hero-content {
-        grid-template-columns: 300px 1fr;
-        gap: 3rem;
-    }
-}
-
 @media (max-width: 768px) {
     .hero-content {
         grid-template-columns: 1fr;
-        text-align: center;
         gap: 2rem;
-        padding: 100px 0 40px;
+        text-align: center;
     }
-
-    .poster-wrapper {
-        max-width: 280px;
-        margin: 0 auto;
-    }
-
+    
     .movie-meta {
         justify-content: center;
-        gap: 1rem;
     }
-
+    
     .action-buttons {
         justify-content: center;
     }
-
+    
     .player-header {
         flex-direction: column;
         gap: 1rem;
-        text-align: center;
+        align-items: stretch;
     }
-
-    .player-footer {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
+    
+    .player-controls {
+        justify-content: center;
     }
-
-    .download-card {
-        flex-direction: column;
-        text-align: center;
+    
+    .episodes-grid,
+    .related-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
-
-    .episodes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
-
+    
     .share-options {
         grid-template-columns: 1fr;
-    }
-
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
     }
 }
 
 @media (max-width: 480px) {
-    .poster-wrapper {
-        max-width: 240px;
+    .hero-content {
+        padding: 100px 0 40px;
     }
-
+    
     .movie-title {
         font-size: 2rem;
     }
-
-    .btn-watch, .btn-download, .btn-favorite, .btn-share {
-        padding: 0.75rem 1.5rem;
+    
+    .movie-meta {
+        gap: 1rem;
         font-size: 0.9rem;
     }
-
-    .download-grid {
-        grid-template-columns: 1fr;
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
     }
-
-    .episodes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    
+    .btn-watch,
+    .btn-favorite,
+    .btn-share {
+        justify-content: center;
     }
-
-    .related-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    }
-}
-
-/* Focus Styles */
-.hero-play-btn:focus,
-.btn-watch:focus,
-.btn-download:focus,
-.btn-favorite:focus,
-.btn-share:focus,
-.fullscreen-btn:focus,
-.copy-btn:focus {
-    outline: 2px solid var(--primary-gold);
-    outline-offset: 2px;
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+    
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
     }
 }
 </style>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-let currentVideoSource = 0;
-let isFullscreen = false;
-
-// Scroll to player
-function scrollToPlayer() {
-    const player = document.getElementById('video-player');
-    if (player) {
-        player.scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => showVideo(), 800);
-    }
-}
-
-// Show video player
-function showVideo() {
-    const loading = document.getElementById('video-loading');
-    const videoElement = document.getElementById('video-player-element');
-    const videoFrame = document.getElementById('video-frame');
-    
-    setTimeout(() => {
-        loading.style.display = 'none';
-        
-        if (videoElement) {
-            videoElement.style.display = 'block';
-            videoElement.play().catch(e => console.log('Auto-play prevented'));
-        }
-        
-        if (videoFrame) {
-            videoFrame.style.display = 'block';
-        }
-    }, 2000);
-}
-
-// Change video source
-function changeVideoSource() {
-    const select = document.getElementById('source-select');
-    const selectedOption = select.options[select.selectedIndex];
-    const newUrl = selectedOption.dataset.url;
-    const sourceType = selectedOption.dataset.type;
-    
-    const videoElement = document.getElementById('video-player-element');
-    const videoFrame = document.getElementById('video-frame');
-    const loading = document.getElementById('video-loading');
-    
-    loading.style.display = 'flex';
-    
-    if (videoElement) videoElement.style.display = 'none';
-    if (videoFrame) videoFrame.style.display = 'none';
-    
-    setTimeout(() => {
-        if (sourceType === 'iframe' || newUrl.includes('embed')) {
-            if (videoFrame) {
-                videoFrame.src = newUrl;
-                videoFrame.style.display = 'block';
-            }
-            if (videoElement) videoElement.style.display = 'none';
-        } else {
-            if (videoElement) {
-                const source = videoElement.querySelector('source');
-                source.src = newUrl;
-                videoElement.load();
-                videoElement.style.display = 'block';
-                videoElement.play().catch(e => console.log('Auto-play prevented'));
-            }
-            if (videoFrame) videoFrame.style.display = 'none';
-        }
-        
-        loading.style.display = 'none';
-    }, 1500);
-}
-
-// Toggle fullscreen
-function toggleFullscreen() {
-    const wrapper = document.getElementById('video-wrapper');
-    
-    if (!isFullscreen) {
-        if (wrapper.requestFullscreen) {
-            wrapper.requestFullscreen();
-        } else if (wrapper.webkitRequestFullscreen) {
-            wrapper.webkitRequestFullscreen();
-        } else if (wrapper.msRequestFullscreen) {
-            wrapper.msRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    }
-}
-
-// Update fullscreen button
-function updateFullscreenButton() {
-    const btn = document.querySelector('.fullscreen-btn i');
-    isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-    
-    if (btn) {
-        btn.className = isFullscreen ? 'fas fa-compress' : 'fas fa-expand';
-    }
-}
-
-// Toggle downloads
-function toggleDownloads() {
-    const section = document.getElementById('download-section');
-    if (section) {
-        const isVisible = section.style.display !== 'none';
-        section.style.display = isVisible ? 'none' : 'block';
-        
-        if (!isVisible) {
-            section.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-}
-
-// Toggle favorite
-function toggleFavorite(movieId) {
-    const btn = document.querySelector('.btn-favorite');
-    const icon = btn.querySelector('i');
-    
-    if (icon.classList.contains('far')) {
-        icon.className = 'fas fa-heart';
-        btn.innerHTML = '<i class="fas fa-heart"></i> Remove from Favorites';
-        showNotification('Added to favorites!', 'success');
-    } else {
-        icon.className = 'far fa-heart';
-        btn.innerHTML = '<i class="far fa-heart"></i> Favorite';
-        showNotification('Removed from favorites!', 'info');
-    }
-}
-
-// Show share modal
-function showShareModal() {
-    const modal = document.getElementById('share-modal');
-    modal.classList.add('show');
-    modal.style.display = 'flex';
-}
-
-// Close modal
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.remove('show');
-    modal.style.display = 'none';
-}
-
-// Share on social platforms
-function shareOn(platform) {
-    const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent(document.title);
-    const text = encodeURIComponent('Check out this amazing movie!');
-    
-    let shareUrl = '';
-    
-    switch(platform) {
-        case 'facebook':
-            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-            break;
-        case 'twitter':
-            shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-            break;
-        case 'whatsapp':
-            shareUrl = `https://wa.me/?text=${text}%20${url}`;
-            break;
-        case 'telegram':
-            shareUrl = `https://t.me/share/url?text=${text}&url=${url}`;
-            break;
-    }
-    
-    if (shareUrl) {
-        window.open(shareUrl, '_blank', 'width=600,height=400');
-    }
-}
-
-// Copy to clipboard
-function copyToClipboard() {
-    const input = document.getElementById('share-url-input');
-    const btn = document.querySelector('.copy-btn');
-    
-    input.select();
-    document.execCommand('copy');
-    
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check"></i>';
-    
-    showNotification('Link copied to clipboard!', 'success');
-    
-    setTimeout(() => {
-        btn.innerHTML = originalHTML;
-    }, 2000);
-}
-
-// Notification system
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    
-    const iconClass = type === 'success' ? 'check-circle' : 'info-circle';
-    notification.innerHTML = `
-        <i class="fas fa-${iconClass}"></i>
-        <span>${message}</span>
-    `;
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        background: ${type === 'success' ? 'var(--primary-gold)' : 'var(--primary-red)'};
-        color: ${type === 'success' ? 'var(--primary-black)' : 'var(--white)'};
-        padding: 1rem 1.5rem;
-        border-radius: var(--border-radius-small);
-        font-weight: 600;
-        z-index: 10000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        box-shadow: var(--shadow-medium);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        max-width: 300px;
-    `;
-
-    document.body.appendChild(notification);
-
-    requestAnimationFrame(() => {
-        notification.style.transform = 'translateX(0)';
-    });
-
-    setTimeout(() => {
-        notification.style.transform = 'translateX(100%)';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Event listeners
-document.addEventListener('fullscreenchange', updateFullscreenButton);
-document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
-document.addEventListener('msfullscreenchange', updateFullscreenButton);
-
-// Close modal on outside click
-document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-backdrop')) {
-        const modal = e.target.closest('.modal');
-        if (modal) {
-            closeModal(modal.id);
-        }
-    }
-});
-
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Auto-play video if hash is present
-    if (window.location.hash === '#play') {
-        setTimeout(() => scrollToPlayer(), 1000);
-    }
-    
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        const videoElement = document.getElementById('video-player-element');
-        
-        if (videoElement && document.activeElement === videoElement) {
-            switch(e.key) {
-                case ' ':
-                    e.preventDefault();
-                    if (videoElement.paused) {
-                        videoElement.play();
-                    } else {
-                        videoElement.pause();
-                    }
-                    break;
-                case 'f':
-                case 'F':
-                    e.preventDefault();
-                    toggleFullscreen();
-                    break;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    videoElement.currentTime += 10;
-                    break;
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    videoElement.currentTime -= 10;
-                    break;
-            }
-        }
-        
-        if (e.key === 'Escape') {
-            const openModal = document.querySelector('.modal.show');
-            if (openModal) {
-                closeModal(openModal.id);
-            } else if (isFullscreen) {
-                toggleFullscreen();
-            }
-        }
-    });
-    
-    // Enhanced image loading
-    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
-        img.addEventListener('load', () => {
-            img.style.opacity = '1';
-        });
-        
-        img.addEventListener('error', () => {
-            img.src = '/static/images/default-poster.jpg';
-        });
-    });
-    
-    // Video player events
-    const videoElement = document.getElementById('video-player-element');
-    if (videoElement) {
-        videoElement.addEventListener('loadstart', () => {
-            showNotification('Loading video...', 'info');
-        });
-        
-        videoElement.addEventListener('canplay', () => {
-            showNotification('Video ready to play', 'success');
-        });
-        
-        videoElement.addEventListener('error', () => {
-            showNotification('Error loading video. Please try another source.', 'error');
-        });
-    }
-});
-</script>
 {% endblock %}

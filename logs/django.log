@@ -19141,3 +19141,74 @@ INFO 2025-09-14 04:47:52,423 basehttp 32280 3740 "GET /static/img/no-bg-logo.png
 INFO 2025-09-14 04:47:53,184 basehttp 32280 3740 "GET /static/img/logo.jpg HTTP/1.1" 200 26045
 INFO 2025-09-14 04:48:12,901 autoreload 32280 35316 C:\Users\Ibeawuchi\Desktop\hentai\bangxxx\bangxxx\settings.py changed, reloading.
 INFO 2025-09-14 04:48:20,425 autoreload 33936 21036 Watching for file changes with StatReloader
+INFO 2025-09-14 20:16:44,725 autoreload 32112 2916 Watching for file changes with StatReloader
+INFO 2025-09-14 20:49:17,721 autoreload 31240 38972 Watching for file changes with StatReloader
+INFO 2025-09-14 20:49:31,228 basehttp 31240 39628 "GET / HTTP/1.1" 301 0
+INFO 2025-09-14 20:49:31,300 basehttp 31240 38492 code 400, message Bad request version ('R¡×[]\x9bäÂñ\x07(±FÖ·%k§Û°Y²Ú6ätÕ')
+ERROR 2025-09-14 20:49:31,306 basehttp 31240 38492 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 20:49:31,319 basehttp 31240 15060 code 400, message Bad request version ('ÊØ\x06\x86`Û\x9a\x18ånþÛ{j\x7f´\x81lnþÉk')
+ERROR 2025-09-14 20:49:31,319 basehttp 31240 15060 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 20:49:47,044 autoreload 31240 38972 C:\Users\Ibeawuchi\Desktop\hentai\bangxxx\bangxxx\settings.py changed, reloading.
+INFO 2025-09-14 20:49:48,900 autoreload 1036 38336 Watching for file changes with StatReloader
+INFO 2025-09-14 20:51:55,081 autoreload 10684 17072 Watching for file changes with StatReloader
+INFO 2025-09-14 20:52:22,546 basehttp 10684 33700 "GET / HTTP/1.1" 200 130371
+INFO 2025-09-14 20:52:22,678 basehttp 10684 33700 "GET /static/img/no-bg-logo.png HTTP/1.1" 304 0
+INFO 2025-09-14 20:52:24,490 basehttp 10684 33700 "GET /static/img/logo.jpg HTTP/1.1" 200 26045
+ERROR 2025-09-14 20:52:36,923 log 10684 33700 Internal Server Error: /watch/mujin-eki-the-animation-episode-1-english/
+Traceback (most recent call last):
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\response.py", line 90, in rendered_content
+    template = self.resolve_template(self.template_name)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\response.py", line 72, in resolve_template
+    return select_template(template, using=self.using)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\loader.py", line 42, in select_template
+    return engine.get_template(template_name)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\loader_tags.py", line 293, in do_extends
+    nodelist = parser.parse()
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 513, in parse
+    raise self.error(token, e)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 511, in parse
+    compiled_result = compile_func(self, token)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\loader_tags.py", line 232, in do_block
+    nodelist = parser.parse(("endblock",))
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 518, in parse
+    self.unclosed_block_tag(parse_until)
+  File "C:\Users\Ibeawuchi\AppData\Local\Programs\Python\Python310\lib\site-packages\django\template\base.py", line 581, in unclosed_block_tag
+    raise self.error(token, msg)
+django.template.exceptions.TemplateSyntaxError: Unclosed tag on line 461: 'block'. Looking for one of: endblock.
+ERROR 2025-09-14 20:52:37,026 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 500 185140
+WARNING 2025-09-14 20:52:37,560 log 10684 33700 Not Found: /favicon.ico
+WARNING 2025-09-14 20:52:37,562 basehttp 10684 33700 "GET /favicon.ico HTTP/1.1" 404 4002
+INFO 2025-09-14 20:52:42,822 basehttp 10684 37580 "GET / HTTP/1.1" 200 130371
+INFO 2025-09-14 20:52:42,908 basehttp 10684 37580 "GET /static/img/no-bg-logo.png HTTP/1.1" 200 100163
+INFO 2025-09-14 20:52:47,787 basehttp 10684 37580 "GET /static/img/logo.jpg HTTP/1.1" 200 26045
+INFO 2025-09-14 20:53:06,510 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85320
+INFO 2025-09-14 20:54:28,692 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85329
+INFO 2025-09-14 20:55:04,443 basehttp 10684 33700 "GET /category/hentai-anime/ HTTP/1.1" 200 125816
+INFO 2025-09-14 20:55:51,082 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85338
+INFO 2025-09-14 20:56:48,054 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85290
+INFO 2025-09-14 20:57:52,739 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85290
+INFO 2025-09-14 20:59:23,182 basehttp 10684 33700 "GET /watch/mujin-eki-the-animation-episode-1-english/ HTTP/1.1" 200 85299
