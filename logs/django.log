@@ -19111,3 +19111,33 @@ INFO 2025-09-14 04:46:07,110 basehttp 15404 7324 code 400, message Bad request v
 ERROR 2025-09-14 04:46:07,124 basehttp 15404 7324 You're accessing the development server over HTTPS, but it only supports HTTP.
 INFO 2025-09-14 04:46:07,242 basehttp 15404 23164 code 400, message Bad request version ('ÊÊ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06sjj\x00\x00\x00\x12\x00\x00\x00')
 ERROR 2025-09-14 04:46:07,426 basehttp 15404 23164 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:00,380 autoreload 32280 35316 Watching for file changes with StatReloader
+INFO 2025-09-14 04:47:03,040 basehttp 32280 31296 code 400, message Bad request version (':\x00')
+ERROR 2025-09-14 04:47:03,041 basehttp 32280 31296 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:03,046 basehttp 32280 17156 code 400, message Bad request version ('ì«\x15\x87\x87ûöR×rf\x9d*/*H°³9c\x8bê')
+ERROR 2025-09-14 04:47:03,046 basehttp 32280 17156 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:03,118 basehttp 32280 30836 code 400, message Bad request version ('jj\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06S')
+ERROR 2025-09-14 04:47:03,130 basehttp 32280 30836 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:03,195 basehttp 32280 17684 code 400, message Bad request version ('\x02h2\x08http/1.1\x00\x05\x00\x05\x01\x00\x00\x00\x00\x00\x12\x00\x00\x00#\x00\x00\x00')
+ERROR 2025-09-14 04:47:03,212 basehttp 32280 17684 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:03,241 basehttp 32280 8668 code 400, message Bad request version ('zz\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06Súú\x00\x00\x00#\x00\x00\x00')
+ERROR 2025-09-14 04:47:03,246 basehttp 32280 8668 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:03,261 basehttp 32280 15852 code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x07\x00\x01\x00\x06ü\x03\x03m_\xadT¯\x08/ñÐ\x10\x16\x97wL\x8d|Â\x13\x89Èyi}')
+ERROR 2025-09-14 04:47:03,325 basehttp 32280 15852 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:03,357 basehttp 32280 18580 code 400, message Bad request version ('\x02h2\x08http/1.1\x00-\x00\x02\x01\x01\x00+\x00\x07\x06\x1a\x1a\x03\x04\x03\x03DÍ\x00\x05\x00\x03\x02h2\x00#\x00\x00\x00')
+ERROR 2025-09-14 04:47:03,364 basehttp 32280 18580 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:03,373 basehttp 32280 7536 code 400, message Bad request version ('l\x07s\x9e©èò£Ù\x83gó\x12\x10\x8b|')
+ERROR 2025-09-14 04:47:03,391 basehttp 32280 7536 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:11,169 basehttp 32280 28556 code 400, message Bad request version ('êê\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06s\x1a\x1a\x00\x00\x00+\x00\x07\x06')
+ERROR 2025-09-14 04:47:11,171 basehttp 32280 28556 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:11,186 basehttp 32280 28808 code 400, message Bad request version ('ÇÓc}hÊ¡"Þ\x8f\x07(¥')
+ERROR 2025-09-14 04:47:11,187 basehttp 32280 28808 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:47:49,291 basehttp 32280 3740 "GET / HTTP/1.1" 200 129995
+WARNING 2025-09-14 04:47:50,689 log 32280 33684 Not Found: /movies/static/img/no-bg-logo.png
+WARNING 2025-09-14 04:47:51,275 basehttp 32280 33684 "GET /movies/static/img/no-bg-logo.png HTTP/1.1" 404 4065
+WARNING 2025-09-14 04:47:51,601 log 32280 35960 Not Found: /movies/static/img/logo.png
+WARNING 2025-09-14 04:47:51,962 basehttp 32280 35960 "GET /movies/static/img/logo.png HTTP/1.1" 404 4047
+INFO 2025-09-14 04:47:52,423 basehttp 32280 3740 "GET /static/img/no-bg-logo.png HTTP/1.1" 200 100163
+INFO 2025-09-14 04:47:53,184 basehttp 32280 3740 "GET /static/img/logo.jpg HTTP/1.1" 200 26045
+INFO 2025-09-14 04:48:12,901 autoreload 32280 35316 C:\Users\Ibeawuchi\Desktop\hentai\bangxxx\bangxxx\settings.py changed, reloading.
+INFO 2025-09-14 04:48:20,425 autoreload 33936 21036 Watching for file changes with StatReloader
