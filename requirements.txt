@@ -1,5 +1,5 @@
 Django==4.2.7
-Pillow==10.1.0
+Pillow==11.0.0
 requests==2.31.0
 beautifulsoup4==4.12.2
 cloudscraper==1.2.71
