@@ -43,7 +43,7 @@
                 <div class="featured-poster">
                     <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
                          alt="{{ movie.title }}" 
-                         loading="lazy">
+                         >
                     <div class="featured-overlay">
                         <a href="{{ movie.get_absolute_url }}" class="play-button-large" aria-label="Play {{ movie.title }}">
                             <i class="fas fa-play"></i>
@@ -114,7 +114,7 @@
                 <div class="movie-poster">
                     <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
                          alt="{{ movie.title }}" 
-                         loading="lazy">
+                         >
                     <button class="play-button" onclick="playMovie({{ movie.id }})" aria-label="Play {{ movie.title }}">
                         <i class="fas fa-play"></i>
                     </button>
@@ -174,7 +174,7 @@
                     <div class="popular-poster">
                         <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
                              alt="{{ movie.title }}" 
-                             loading="lazy">
+                             >
                     </div>
                     <div class="popular-info">
                         <h4 class="popular-title">{{ movie.title }}</h4>
@@ -1357,7 +1357,7 @@
 
     // Enhanced image loading with better performance
     function setupImageLazyLoading() {
-        const images = document.querySelectorAll('img[loading="lazy"]');
+        const images = document.querySelectorAll('img[]');
         
         const imageObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {

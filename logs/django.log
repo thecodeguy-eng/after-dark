@@ -19105,3 +19105,9 @@ WARNING 2025-09-14 03:59:43,021 log 29708 37252 Not Found: /movies/static/img/no
 WARNING 2025-09-14 03:59:43,025 log 29708 18296 Not Found: /movies/static/img/logo.png
 WARNING 2025-09-14 03:59:43,026 basehttp 29708 37252 "GET /movies/static/img/no-bg-logo.png HTTP/1.1" 404 4065
 WARNING 2025-09-14 03:59:43,032 basehttp 29708 18296 "GET /movies/static/img/logo.png HTTP/1.1" 404 4047
+INFO 2025-09-14 04:45:58,704 autoreload 15404 37780 Watching for file changes with StatReloader
+INFO 2025-09-14 04:46:06,995 basehttp 15404 1548 "GET / HTTP/1.1" 301 0
+INFO 2025-09-14 04:46:07,110 basehttp 15404 7324 code 400, message Bad request version ('PÂ\x13∏Œx')
+ERROR 2025-09-14 04:46:07,124 basehttp 15404 7324 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-14 04:46:07,242 basehttp 15404 23164 code 400, message Bad request version ('  \x13\x01\x13\x02\x13\x03¿+¿/¿,¿0Ã©Ã®¿\x13¿\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06sjj\x00\x00\x00\x12\x00\x00\x00')
+ERROR 2025-09-14 04:46:07,426 basehttp 15404 23164 You're accessing the development server over HTTPS, but it only supports HTTP.

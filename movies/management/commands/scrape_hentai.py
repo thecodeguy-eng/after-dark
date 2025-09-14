@@ -121,21 +121,31 @@ def extract_series_info(title):
 class Command(BaseCommand):
     help = 'Scrape content from hentaiplay.net and update database'
 
+    def add_arguments(self, parser):
+        # required positional argument
+        parser.add_argument('startpage', type=int, help='The page number to start scraping from')
+        # optional positional argument
+        parser.add_argument('endpage', type=int, nargs='?', default=None, help='The page number to stop scraping at')
+
     def handle(self, *args, **options):
-        from django.db import connection
-        import time
-        
-        page = 1
+        startpage = options['startpage']
+        endpage = options['endpage']
+
+        page = startpage
         consecutive_errors = 0
         max_consecutive_errors = 5
-        
+
         while True:
+            if endpage and page > endpage:
+                print("✅ Reached end page limit.")
+                break
+
             try:
                 print(f"\n🌐 Fetching page {page}...")
                 scraper = cloudscraper.create_scraper()
                 headers = {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                                  "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                     "Accept": "application/json",
                     "Referer": "https://hentaiplay.net/",
                 }
@@ -143,7 +153,7 @@ class Command(BaseCommand):
                 response = scraper.get(API_URL, params={'page': page, 'per_page': 20}, headers=headers, timeout=15)
                 response.raise_for_status()
                 data = response.json()
-                
+
             except requests.exceptions.HTTPError as http_err:
                 if response.status_code == 404:
                     print("✅ All pages processed.")
@@ -184,37 +194,37 @@ class Command(BaseCommand):
         """Process individual item from API"""
         wp_id = item.get('id')
         raw_title = item.get('title', {}).get('rendered', '').strip()
-        
+
         if not raw_title or not wp_id:
             print("⚠️ Skipped: missing title or ID.")
             return
 
         print(f"\n🎬 Processing: {raw_title} (ID: {wp_id})")
-        
+
         # Parse content
         content_html = item.get('content', {}).get('rendered', '')
         excerpt_html = item.get('excerpt', {}).get('rendered', '')
-        
+
         soup = BeautifulSoup(content_html, 'html.parser')
         excerpt_soup = BeautifulSoup(excerpt_html, 'html.parser')
-        
+
         # Clean title and create slug
         clean_title = re.sub(r'<[^>]+>', '', raw_title).strip()
         slug = slugify(clean_title)
-        
+
         # Parse dates
         date = parse_wordpress_date(item.get('date', ''))
         date_gmt = parse_wordpress_date(item.get('date_gmt', ''))
         modified = parse_wordpress_date(item.get('modified', ''))
         modified_gmt = parse_wordpress_date(item.get('modified_gmt', ''))
-        
+
         # Extract video sources and download links
         video_sources = extract_video_sources(soup)
         download_links = extract_download_links(soup)
-        
+
         print(f"📹 Found {len(video_sources)} video source(s)")
         print(f"⬇️ Found {len(download_links)} download link(s)")
-        
+
         # Get or create movie
         movie, created = Movie.objects.get_or_create(
             wp_id=wp_id,
@@ -239,7 +249,7 @@ class Command(BaseCommand):
                 'scraped': True,
             }
         )
-        
+
         if created:
             print(f"✅ Created new movie: {clean_title}")
         else:
@@ -255,18 +265,18 @@ class Command(BaseCommand):
                 movie.modified = modified
                 movie.modified_gmt = modified_gmt
                 updated = True
-                
+
             if updated:
                 movie.save()
                 print(f"🔄 Updated movie: {clean_title}")
             else:
                 print(f"ℹ️ No changes for: {clean_title}")
-        
+
         # Get featured image
         if movie.featured_media_id and not movie.image_url:
             try:
                 img_response = scraper.get(
-                    f"https://hentaiplay.net/wp-json/wp/v2/media/{movie.featured_media_id}", 
+                    f"https://hentaiplay.net/wp-json/wp/v2/media/{movie.featured_media_id}",
                     headers=headers,
                     timeout=10
                 )
@@ -277,7 +287,7 @@ class Command(BaseCommand):
                     print(f"🖼️ Added image: {movie.image_url}")
             except Exception as e:
                 print(f"⚠️ Failed to get image: {e}")
-        
+
         # Process categories
         for cat_id in item.get('categories', []):
             try:
@@ -298,7 +308,7 @@ class Command(BaseCommand):
                         print(f"📁 Added category: {cat_name}")
             except Exception as e:
                 print(f"⚠️ Failed to get category {cat_id}: {e}")
-        
+
         # Process tags
         for tag_id in item.get('tags', []):
             try:
@@ -319,7 +329,7 @@ class Command(BaseCommand):
                         print(f"🏷️ Added tag: {tag_name}")
             except Exception as e:
                 print(f"⚠️ Failed to get tag {tag_id}: {e}")
-        
+
         # Check if this is part of a series and create episode record
         series_name, episode_num, season_num = extract_series_info(clean_title)
         if series_name and episode_num:
@@ -327,15 +337,15 @@ class Command(BaseCommand):
                 name=series_name,
                 defaults={'slug': slugify(series_name)}
             )
-            
+
             episode, episode_created = Episode.objects.get_or_create(
                 series=series,
                 season_number=season_num,
                 episode_number=episode_num,
                 defaults={'movie': movie}
             )
-            
+
             if episode_created:
                 print(f"📺 Created episode: {series_name} S{season_num:02d}E{episode_num:02d}")
-            
+
         print(f"✨ Completed processing: {clean_title}")
