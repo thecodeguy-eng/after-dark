@@ -1008,7 +1008,7 @@
     let autoSlideInterval;
     let sliderInitialized = false;
 
-    // Enhanced load more functionality with better error handling
+    // Updated loadMoreMovies function using the dedicated API endpoint
     async function loadMoreMovies() {
         if (loadingMore) return;
         
@@ -1022,10 +1022,13 @@
         loadBtn.disabled = true;
         
         try {
-            currentPage++;
-            const response = await fetch(`/?page=${currentPage}`, {
+            const nextPage = currentPage + 1;
+            
+            // Use the dedicated API endpoint
+            const response = await fetch(`/api/load-more/?page=${nextPage}`, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
             });
             
@@ -1033,37 +1036,64 @@
                 throw new Error(`HTTP ${response.status}`);
             }
             
-            const html = await response.text();
+            const data = await response.json();
             
-            // Parse and extract new movies
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newMovies = doc.querySelectorAll('.movie-card');
-            
-            if (newMovies.length === 0) {
+            if (!data.movies_html || data.count === 0) {
                 loadBtn.style.display = 'none';
-                showMessage('No more movies to load', 'info');
+                showMessage(data.message || 'No more movies to load', 'info');
                 return;
             }
             
-            // Add new movies with staggered animation
+            // Create temporary container to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = data.movies_html;
+            const newMovies = tempDiv.querySelectorAll('.movie-card');
+            
+            // Get existing movie IDs to prevent any potential duplicates
+            const existingIds = new Set();
+            document.querySelectorAll('.movie-card[data-id]').forEach(card => {
+                const id = card.dataset.id;
+                if (id) existingIds.add(id);
+            });
+            
+            // Filter and add new movies
             const movieGrid = document.getElementById('movie-grid');
             const fragment = document.createDocumentFragment();
+            let addedCount = 0;
             
-            newMovies.forEach((movie, index) => {
+            newMovies.forEach((movie) => {
+                const movieId = movie.dataset.id;
+                
+                // Double-check for duplicates (shouldn't happen with API, but safety first)
+                if (!movieId || existingIds.has(movieId)) {
+                    console.log(`Skipping potential duplicate movie with ID: ${movieId}`);
+                    return;
+                }
+                
                 const clonedMovie = movie.cloneNode(true);
                 clonedMovie.style.opacity = '0';
                 clonedMovie.style.transform = 'translateY(30px)';
                 clonedMovie.style.transition = 'all 0.6s ease';
                 fragment.appendChild(clonedMovie);
+                addedCount++;
             });
             
+            if (addedCount === 0) {
+                loadBtn.style.display = 'none';
+                showMessage('All available movies have been loaded', 'info');
+                return;
+            }
+            
+            // Add new movies to the grid
             movieGrid.appendChild(fragment);
+            
+            // Update page counter
+            currentPage = nextPage;
             
             // Animate new cards
             setTimeout(() => {
                 const allCards = document.querySelectorAll('.movie-card');
-                const newCards = Array.from(allCards).slice(-newMovies.length);
+                const newCards = Array.from(allCards).slice(-addedCount);
                 
                 newCards.forEach((card, index) => {
                     setTimeout(() => {
@@ -1073,9 +1103,19 @@
                 });
             }, 100);
             
+            // Hide load more button if no more pages
+            if (!data.has_next) {
+                loadBtn.style.display = 'none';
+                showMessage('All movies loaded!', 'info');
+            }
+            
+            // Re-setup interactions for new cards
+            enhanceMovieCardInteractions();
+            
+            showMessage(`Loaded ${addedCount} new movies`, 'success');
+            
         } catch (error) {
             console.error('Error loading movies:', error);
-            currentPage--; // Reset page counter
             showMessage('Failed to load more movies. Please try again.', 'error');
         } finally {
             loadingMore = false;
@@ -1084,6 +1124,7 @@
             loadBtn.disabled = false;
         }
     }
+        
 
     // Enhanced play movie functionality
     function playMovie(movieId) {

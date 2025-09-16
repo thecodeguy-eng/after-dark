@@ -226,4 +226,4 @@ admin.site.site_title = 'BangXXX Admin Portal'
 admin.site.index_title = 'Welcome to BangXXX Administration'
 
 # Add custom CSS to admin
-admin.site.index_template = 'admin/custom_index.html'
+# admin.site.index_template = 'admin/custom_index.html'

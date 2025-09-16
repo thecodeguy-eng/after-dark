@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'your-secret-key-here-change-in-production'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.vercel.app', '.xyz', '.onrender.com']
 
@@ -111,7 +111,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://your-domain.com",
+    "https://bangxxx.xyz",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -215,4 +215,4 @@ SCRAPER_SETTINGS = {
 # Site settings
 SITE_NAME = 'BangXXX'
 SITE_DESCRIPTION = 'Premium Adult Entertainment'
-SITE_URL = 'https://your-domain.com'
+SITE_URL = 'https://bangxxx.xyz'

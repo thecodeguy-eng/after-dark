@@ -7,7 +7,47 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from .models import Movie, Category, Tag, Series, Episode
 import json
+from django.template.loader import render_to_string
 
+def load_more_movies(request):
+    """API endpoint for loading more movies via AJAX"""
+    page = request.GET.get('page', 1)
+    
+    try:
+        page = int(page)
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid page number'}, status=400)
+    
+    # Get published movies with same ordering as home view
+    movies_queryset = Movie.objects.filter(status='publish').select_related().prefetch_related('categories', 'tags')
+    
+    paginator = Paginator(movies_queryset, 12)  # Load 12 movies per request
+    
+    try:
+        page_obj = paginator.page(page)
+    except:
+        return JsonResponse({
+            'movies_html': '',
+            'has_next': False,
+            'current_page': page,
+            'total_pages': 0,
+            'count': 0,
+            'message': 'No more movies available'
+        })
+    
+    # Render movies as HTML using a partial template
+    movies_html = render_to_string('movies/partials/movie_cards.html', {
+        'movies': page_obj.object_list,
+        'request': request
+    })
+    
+    return JsonResponse({
+        'movies_html': movies_html,
+        'has_next': page_obj.has_next(),
+        'current_page': page,
+        'total_pages': paginator.num_pages,
+        'count': len(page_obj.object_list)
+    })
 
 def ping_view(request):
     return JsonResponse({"status": "OK"})

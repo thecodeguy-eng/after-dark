@@ -8,6 +8,7 @@ urlpatterns = [
     path('ping/', views.ping_view, name='ping'),
 
     path('', views.HomeView.as_view(), name='home'),
+    path('api/load-more/', views.load_more_movies, name='load_more_movies'),
     path('search/', views.search_view, name='search'),
     path('categories/', views.AllCategoriesView.as_view(), name='all_categories'),
     path('series/', views.AllSeriesView.as_view(), name='all_series'),

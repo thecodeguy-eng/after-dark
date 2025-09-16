@@ -1,0 +1,36 @@
+<!-- movies/templates/movies/partials/movie_cards.html -->
+{% for movie in movies %}
+<div class="movie-card" data-id="{{ movie.id }}">
+    <div class="movie-poster">
+        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
+             alt="{{ movie.title }}" 
+             loading="lazy">
+        <button class="play-button" onclick="playMovie({{ movie.id }})" aria-label="Play {{ movie.title }}">
+            <i class="fas fa-play"></i>
+        </button>
+        <div class="movie-duration">
+            <i class="fas fa-clock"></i>
+            {% if movie.video_sources %}HD{% else %}Preview{% endif %}
+        </div>
+    </div>
+    <div class="movie-info">
+        <h3 class="movie-title">
+            <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+        </h3>
+        <div class="movie-meta">
+            <span class="views">
+                <i class="fas fa-eye"></i>
+                {{ movie.view_count|default:0 }}
+            </span>
+            <span class="date">{{ movie.date|date:"M d" }}</span>
+        </div>
+        {% if movie.categories.all %}
+        <div class="movie-categories">
+            {% for category in movie.categories.all|slice:":2" %}
+            <span class="category-tag">{{ category.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
