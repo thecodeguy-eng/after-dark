@@ -34236,3 +34236,21 @@ INFO 2025-09-16 21:25:10,227 basehttp 1836 13720 "GET / HTTP/1.1" 200 136172
 WARNING 2025-09-16 21:25:10,237 basehttp 1836 2188 "GET /static/default-series.jpg HTTP/1.1" 404 1914
 INFO 2025-09-16 21:25:27,211 basehttp 1836 13720 "GET /api/load-more/?page=2 HTTP/1.1" 200 15561
 INFO 2025-09-16 21:33:55,102 basehttp 1836 21184 "GET / HTTP/1.1" 200 164336
+INFO 2025-09-18 10:37:32,050 autoreload 31448 11020 Watching for file changes with StatReloader
+INFO 2025-09-18 10:37:50,314 basehttp 31448 25924 "GET / HTTP/1.1" 301 0
+INFO 2025-09-18 10:37:50,435 basehttp 31448 4288 code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x06')
+ERROR 2025-09-18 10:37:50,444 basehttp 31448 4288 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-18 10:37:50,456 basehttp 31448 12932 code 400, message Bad request version ('::\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06\x93JJ\x00\x00\x00\x12\x00\x00\x003\x04ï\x04í')
+ERROR 2025-09-18 10:37:50,458 basehttp 31448 12932 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2025-09-18 10:37:51,757 basehttp 31448 32760 "GET /sw.js HTTP/1.1" 301 0
+INFO 2025-09-18 10:38:06,406 autoreload 17616 2876 Watching for file changes with StatReloader
+INFO 2025-09-18 10:38:46,551 basehttp 17616 28148 "GET / HTTP/1.1" 200 221595
+INFO 2025-09-18 10:38:47,038 basehttp 17616 28148 "GET /static/img/no-bg-logo.png HTTP/1.1" 200 100163
+INFO 2025-09-18 10:39:03,650 basehttp 17616 25136 "GET /static/img/logo.jpg HTTP/1.1" 200 26045
+INFO 2025-09-18 10:39:06,850 basehttp 17616 28148 "HEAD / HTTP/1.1" 200 0
+WARNING 2025-09-18 10:39:11,323 log 17616 12844 Not Found: /sw.js
+WARNING 2025-09-18 10:39:11,326 basehttp 17616 12844 "GET /sw.js HTTP/1.1" 404 4335
+INFO 2025-09-18 10:39:17,326 basehttp 17616 28148 "HEAD / HTTP/1.1" 200 0
+INFO 2025-09-18 10:39:17,635 basehttp 17616 25136 "HEAD / HTTP/1.1" 200 0
+INFO 2025-09-18 10:40:02,426 autoreload 17616 2876 C:\Users\Ibeawuchi\Desktop\hentai\bangxxx\bangxxx\settings.py changed, reloading.
+INFO 2025-09-18 10:40:04,080 autoreload 6040 12088 Watching for file changes with StatReloader
