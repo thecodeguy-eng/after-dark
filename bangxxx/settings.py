@@ -133,6 +133,10 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Security settings for production
 if not DEBUG:
+    # HAProxy terminates HTTPS and forwards plain HTTP to this server, so
+    # trust its X-Forwarded-Proto header instead of the raw connection -
+    # otherwise SECURE_SSL_REDIRECT loops forever.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
