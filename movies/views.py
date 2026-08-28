@@ -1,11 +1,12 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from .models import Movie, Category, Tag, Series, Episode
+from .utils import resolve_xvideos_direct_urls, find_xvideos_embed_url
 import json
 from django.template.loader import render_to_string
 
@@ -224,6 +225,54 @@ def get_video_data(request, movie_id):
     }
     
     return JsonResponse(data)
+
+def download_movie(request, movie_id):
+    """Resolve a direct, downloadable video URL and redirect to it.
+
+    xvideos signs its direct mp4 URLs with a short-lived expiry token, so
+    they're resolved live here (rather than at scrape time) to guarantee
+    a working link.
+    """
+    movie = get_object_or_404(Movie, id=movie_id)
+
+    embed_url = find_xvideos_embed_url(movie)
+    if not embed_url:
+        return JsonResponse({'error': 'No resolvable video source for this movie'}, status=404)
+
+    try:
+        direct_urls = resolve_xvideos_direct_urls(embed_url)
+    except Exception as e:
+        return JsonResponse({'error': f'Failed to resolve download link: {e}'}, status=502)
+
+    download_url = direct_urls.get('high') or direct_urls.get('low')
+    if not download_url:
+        return JsonResponse({'error': 'Could not find a direct video URL'}, status=502)
+
+    return HttpResponseRedirect(download_url)
+
+
+def resolve_video_source(request, movie_id):
+    """Resolve a movie's playable direct mp4 URL as JSON, for the player to
+    fetch client-side. Playing the raw file directly (instead of embedding
+    xvideos' own player page in an iframe) skips xvideos' own pre-roll ads,
+    since those are injected by their player page, not the video file itself.
+    """
+    movie = get_object_or_404(Movie, id=movie_id)
+
+    embed_url = find_xvideos_embed_url(movie)
+    if not embed_url:
+        return JsonResponse({'error': 'No resolvable video source for this movie'}, status=404)
+
+    try:
+        direct_urls = resolve_xvideos_direct_urls(embed_url)
+    except Exception as e:
+        return JsonResponse({'error': f'Failed to resolve video: {e}'}, status=502)
+
+    play_url = direct_urls.get('high') or direct_urls.get('low')
+    if not play_url:
+        return JsonResponse({'error': 'Could not find a direct video URL'}, status=502)
+
+    return JsonResponse({'url': play_url})
 
 class AllCategoriesView(ListView):
     model = Category

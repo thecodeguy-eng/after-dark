@@ -1,9 +1,9 @@
 {% extends 'movies/base.html' %}
 {% load static %}
 
-{% block title %}{{ category.name }} - BangXXX{% endblock %}
+{% block title %}{{ category.name }} - After Dark{% endblock %}
 
-{% block meta_description %}Browse {{ category.name }} category on BangXXX. Discover high-quality adult entertainment in this category.{% endblock %}
+{% block meta_description %}Browse {{ category.name }} category on After Dark. Discover high-quality adult entertainment in this category.{% endblock %}
 
 {% block content %}
 <!-- Category Hero Section -->
@@ -67,11 +67,14 @@
                 <div class="movie-grid" id="movies-grid">
                     {% for movie in movies %}
                         <div class="movie-card" data-date="{{ movie.date|date:'Y-m-d' }}" data-views="{{ movie.view_count }}" data-title="{{ movie.title }}">
-                            <div class="movie-poster">
-                                <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
-                                     alt="{{ movie.title }}" 
+                            <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
+                                <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                                     alt="{{ movie.title }}"
                                      loading="lazy"
                                      onerror="this.src='/static/default-poster.jpg'">
+                                {% if movie.video_sources.0.preview %}
+                                <video class="poster-preview" muted loop playsinline preload="none"></video>
+                                {% endif %}
                                 <div class="movie-overlay">
                                     <a href="{{ movie.get_absolute_url }}" class="play-button" aria-label="Watch {{ movie.title }}">
                                         <i class="fas fa-play"></i>

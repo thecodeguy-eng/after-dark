@@ -1,9 +1,9 @@
 {% extends 'movies/base.html' %}
 {% load static %}
 
-{% block title %}{{ category.name }} - BangXXX{% endblock %}
+{% block title %}{{ category.name }} - After Dark{% endblock %}
 
-{% block meta_description %}Watch {{ category.name }} movies on BangXXX. High-quality adult entertainment in the {{ category.name }} category.{% endblock %}
+{% block meta_description %}Watch {{ category.name }} movies on After Dark. High-quality adult entertainment in the {{ category.name }} category.{% endblock %}
 
 {% block content %}
 <!-- Category Hero Section -->
@@ -132,10 +132,13 @@
             <div class="movie-grid" id="movie-grid">
                 {% for movie in movies %}
                 <div class="movie-card" data-id="{{ movie.id }}">
-                    <div class="movie-poster">
-                        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
-                             alt="{{ movie.title }}" 
+                    <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
+                        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                             alt="{{ movie.title }}"
                              loading="lazy">
+                        {% if movie.video_sources.0.preview %}
+                        <video class="poster-preview" muted loop playsinline preload="none"></video>
+                        {% endif %}
                         <div class="movie-overlay">
                             <button class="play-button" onclick="window.location.href='{{ movie.get_absolute_url }}'">
                                 <i class="fas fa-play"></i>
@@ -888,7 +891,7 @@
         if (navigator.share) {
             navigator.share({
                 title: movieTitle,
-                text: `Check out "${movieTitle}" on BangXXX`,
+                text: `Check out "${movieTitle}" on After Dark`,
                 url: movieUrl
             });
         } else {

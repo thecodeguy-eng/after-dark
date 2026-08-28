@@ -19,4 +19,6 @@ urlpatterns = [
     # API endpoints
     path('api/search/', views.api_search, name='api_search'),
     path('api/video/<int:movie_id>/', views.get_video_data, name='get_video_data'),
+    path('api/download/<int:movie_id>/', views.download_movie, name='download_movie'),
+    path('api/resolve/<int:movie_id>/', views.resolve_video_source, name='resolve_video_source'),
 ]

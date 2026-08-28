@@ -1,34 +1,9 @@
 {% extends 'movies/base.html' %}
 {% load static %}
 
-{% block title %}BangXXX - Premium Adult Entertainment{% endblock %}
+{% block title %}After Dark - Premium Adult Entertainment{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="hero-content">
-        <h1 class="hero-title">Welcome to BangXXX</h1>
-        <p class="hero-subtitle">
-            Discover premium adult entertainment with high-quality content, 
-            seamless streaming, and exclusive collections all in one place.
-        </p>
-        <div class="hero-stats">
-            <div class="stat-item">
-                <span class="stat-number">10K+</span>
-                <span class="stat-label">Videos</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">50+</span>
-                <span class="stat-label">Categories</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-number">4K</span>
-                <span class="stat-label">HD Quality</span>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Featured Movies Section -->
 {% if featured_movies %}
 <section class="section">
@@ -111,10 +86,13 @@
         <div class="movie-grid" id="movie-grid">
             {% for movie in recent_movies %}
             <div class="movie-card" data-id="{{ movie.id }}">
-                <div class="movie-poster">
-                    <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
-                         alt="{{ movie.title }}" 
+                <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
+                    <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                         alt="{{ movie.title }}"
                          >
+                    {% if movie.video_sources.0.preview %}
+                    <video class="poster-preview" muted loop playsinline preload="none"></video>
+                    {% endif %}
                     <button class="play-button" onclick="playMovie({{ movie.id }})" aria-label="Play {{ movie.title }}">
                         <i class="fas fa-play"></i>
                     </button>
@@ -207,41 +185,6 @@
 
 {% block extra_css %}
 <style>
-    /* ===== ENHANCED RESPONSIVE HERO STATS ===== */
-    .hero-stats {
-        display: flex;
-        justify-content: center;
-        gap: clamp(25px, 8vw, 60px);
-        margin-top: clamp(30px, 6vh, 50px);
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .stat-item {
-        text-align: center;
-        min-width: clamp(80px, 15vw, 120px);
-        flex: 1;
-        max-width: 150px;
-    }
-
-    .stat-number {
-        display: block;
-        font-size: clamp(2rem, 6vw, 3.5rem);
-        font-weight: 800;
-        background: var(--gradient-gold);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        line-height: 1;
-        margin-bottom: clamp(5px, 1.5vw, 10px);
-    }
-
-    .stat-label {
-        font-size: clamp(0.8rem, 2.2vw, 1.1rem);
-        color: var(--text-gray);
-        display: block;
-        font-weight: 500;
-    }
-
     /* ===== FULLY RESPONSIVE FEATURED GRID ===== */
     .featured-grid {
         display: grid;
@@ -300,7 +243,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(45deg, rgba(220, 38, 38, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
+        background: linear-gradient(160deg, rgba(255, 31, 90, 0.35) 0%, rgba(0, 0, 0, 0.55) 55%, rgba(0, 0, 0, 0.85) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -315,11 +258,20 @@
     }
 
     .featured-card:hover .featured-poster img {
-        transform: scale(1.05);
+        transform: scale(1.06);
+        filter: brightness(0.9);
+    }
+
+    .featured-card {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .featured-card:hover {
+        box-shadow: var(--shadow-heavy), 0 0 40px rgba(220, 38, 38, 0.25);
     }
 
     .play-button-large {
-        background: rgba(255, 215, 0, 0.95);
+        background: var(--gradient-gold);
         border: none;
         border-radius: 50%;
         width: clamp(60px, 12vw, 90px);
@@ -334,12 +286,19 @@
         text-decoration: none;
         margin-bottom: clamp(15px, 3vw, 25px);
         box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+        animation: playPulseLarge 2s ease-out infinite;
     }
 
     .play-button-large:hover {
-        transform: scale(1.1);
+        transform: scale(1.12);
         background: var(--primary-gold);
         box-shadow: 0 6px 30px rgba(255, 215, 0, 0.6);
+    }
+
+    @keyframes playPulseLarge {
+        0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(255, 215, 0, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
     }
 
     .featured-info {
@@ -433,8 +392,8 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: var(--gradient-red);
-        opacity: 0.1;
+        background: var(--gradient-crimson);
+        opacity: 0.12;
         transition: left 0.5s ease;
     }
 
@@ -443,9 +402,9 @@
     }
 
     .category-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-6px);
         border-color: var(--primary-gold);
-        box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
+        box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3), 0 0 25px rgba(255, 215, 0, 0.1);
     }
 
     .category-icon {
@@ -512,14 +471,30 @@
     }
 
     .btn-primary {
-        background: var(--gradient-red);
+        background: var(--gradient-crimson);
         color: var(--white);
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
     }
 
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
+        transform: skewX(-15deg);
+        transition: left 0.6s ease;
+    }
+
+    .btn-primary:hover::before {
+        left: 130%;
+    }
+
     .btn-primary:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+        box-shadow: 0 8px 30px rgba(255, 31, 90, 0.45);
     }
 
     .btn-secondary {
@@ -532,6 +507,7 @@
         background: var(--light-gray);
         border-color: var(--primary-gold);
         transform: translateY(-2px);
+        box-shadow: var(--glow-gold);
     }
 
     /* ===== FULLY RESPONSIVE POPULAR SECTION ===== */
@@ -576,14 +552,30 @@
     }
 
     .popular-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.3);
+        transform: translateY(-8px) scale(1.015);
+        box-shadow: 0 20px 40px rgba(220, 38, 38, 0.3), 0 0 25px rgba(255, 215, 0, 0.1);
         border-color: var(--primary-gold);
     }
     .popular-poster {
         aspect-ratio: 16/9;
         overflow: hidden;
         position: relative;
+    }
+
+    .popular-poster::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 60%);
+        opacity: 0.5;
+        transition: var(--transition-smooth);
+        pointer-events: none;
+    }
+
+    .popular-card:hover .popular-poster::before {
+        opacity: 1;
+        background: linear-gradient(to top, rgba(220, 38, 38, 0.45) 0%, transparent 65%);
     }
 
     .popular-poster img {
@@ -595,6 +587,7 @@
 
     .popular-card:hover .popular-poster img {
         transform: scale(1.1);
+        filter: brightness(0.9);
     }
 
     .popular-info {
@@ -715,15 +708,6 @@
 
     /* ===== MOBILE SPECIFIC ADJUSTMENTS ===== */
     @media (max-width: 768px) {
-        .hero-stats {
-            gap: 30px;
-            padding: 0 10px;
-        }
-
-        .stat-item {
-            min-width: 90px;
-        }
-
         .featured-grid {
             gap: 20px;
         }
@@ -765,25 +749,6 @@
     }
 
     @media (max-width: 480px) {
-        .hero-stats {
-            gap: 20px;
-            flex-direction: row;
-            justify-content: space-around;
-        }
-
-        .stat-item {
-            min-width: 70px;
-            flex: 1;
-        }
-
-        .stat-number {
-            font-size: 1.8rem;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-        }
-
         .featured-card {
             aspect-ratio: 16/11;
         }
@@ -854,15 +819,6 @@
 
     /* Extra small screens */
     @media (max-width: 320px) {
-        .hero-stats {
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .stat-item {
-            min-width: auto;
-        }
-
         .popular-card {
             flex: 0 0 240px;
         }
@@ -955,11 +911,6 @@
 
         .section {
             padding: 30px 0;
-        }
-
-        .hero-stats {
-            margin-top: 20px;
-            gap: 40px;
         }
     }
 
@@ -1385,7 +1336,7 @@
 
         // Observe all animatable elements
         const animatableElements = document.querySelectorAll(
-            '.movie-card, .category-card, .popular-card, .featured-card, .stat-item'
+            '.movie-card, .category-card, .popular-card, .featured-card'
         );
         
         animatableElements.forEach(el => {

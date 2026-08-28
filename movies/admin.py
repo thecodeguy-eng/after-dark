@@ -221,9 +221,9 @@ class EpisodeAdmin(admin.ModelAdmin):
     movie_link.short_description = 'Link'
 
 # Customize admin site
-admin.site.site_header = 'BangXXX Admin'
-admin.site.site_title = 'BangXXX Admin Portal'
-admin.site.index_title = 'Welcome to BangXXX Administration'
+admin.site.site_header = 'After Dark Admin'
+admin.site.site_title = 'After Dark Admin Portal'
+admin.site.index_title = 'Welcome to After Dark Administration'
 
 # Add custom CSS to admin
 # admin.site.index_template = 'admin/custom_index.html'

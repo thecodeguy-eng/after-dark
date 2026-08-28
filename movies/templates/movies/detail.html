@@ -1,11 +1,11 @@
 {% extends 'movies/base.html' %}
 {% load static %}
 
-{% block title %}{{ movie.title }} - BangXXX{% endblock %}
+{% block title %}{{ movie.title }} - After Dark{% endblock %}
 
 {% load movie_extras %}
 
-{% block meta_description %}Watch {{ movie.title }} on BangXXX. {{ movie.excerpt|truncatewords:20|default:"Premium adult entertainment content." }}{% endblock %}
+{% block meta_description %}Watch {{ movie.title }} on After Dark. {{ movie.excerpt|truncatewords:20|default:"Premium adult entertainment content." }}{% endblock %}
 
 {% block content %}
 <div class="movie-detail-container">
@@ -97,9 +97,16 @@
                                 <i class="fas fa-share-alt"></i>
                                 Share
                             </button>
-                            
+
+                            {% if movie.video_sources %}
+                            <a class="btn-download" href="{% url 'movies:download_movie' movie.id %}" target="_blank" rel="noopener">
+                                <i class="fas fa-download"></i>
+                                Download
+                            </a>
+                            {% endif %}
+
                             <div class="download-info-text">
-                                <small><i class="fas fa-info-circle"></i> To download, click the 3 dots in the video player</small>
+                                <small><i class="fas fa-info-circle"></i> Download link is resolved fresh each time - it may take a moment to load</small>
                             </div>
                         </div>
                     </div>
@@ -142,16 +149,26 @@
                     
                     <!-- Video Player -->
                     {% with source=movie.video_sources.0 %}
-                    {% if 'iframe' in source.type|default:'' or 'embed' in source.url %}
-                    <iframe id="video-frame" 
-                            src="{{ source.url }}" 
-                            frameborder="0" 
+                    {% if 'xvideos.com/embedframe' in source.url %}
+                    <!-- Resolved to a direct file client-side (see script below) instead of
+                         embedding xvideos' own player page, so their pre-roll/skip ads never load -->
+                    <video id="video-player-element"
+                           data-resolve-url="{% url 'movies:resolve_video_source' movie.id %}"
+                           controls
+                           preload="none"
+                           poster="{{ movie.image_url }}">
+                        Your browser does not support the video tag.
+                    </video>
+                    {% elif 'iframe' in source.type|default:'' or 'embed' in source.url %}
+                    <iframe id="video-frame"
+                            src="{{ source.url }}"
+                            frameborder="0"
                             allowfullscreen
                             allow="autoplay; fullscreen">
                     </iframe>
                     {% else %}
-                    <video id="video-player-element" 
-                           controls 
+                    <video id="video-player-element"
+                           controls
                            preload="metadata"
                            autoplay>
                         <source src="{{ source.url }}" type="{{ source.type|default:'video/mp4' }}">
@@ -165,7 +182,7 @@
                     <div class="now-playing">
                         <h3>{{ movie.title }}</h3>
                         <p class="video-info">Quality: HD | Status: Ready to play</p>
-                        <small><i class="fas fa-info-circle" style="color: red;"></i> To download, click the 3 dots in the video player</small>
+                        <small><i class="fas fa-info-circle" style="color: red;"></i> Use the Download button above to save this video</small>
                     </div>
                     <div class="player-stats">
                         <span>{{ movie.view_count|default:0|floatformat:0 }} views</span>
@@ -331,10 +348,36 @@ document.addEventListener('DOMContentLoaded', function() {
             videoFrame.style.display = 'block';
         }
     }
-    
-    // Show video immediately
-    showVideo();
-    
+
+    const resolveUrl = videoElement ? videoElement.dataset.resolveUrl : null;
+
+    if (resolveUrl) {
+        // Ad-free path: resolve the direct file instead of embedding xvideos'
+        // own player page (that's where their pre-roll/skip ads come from).
+        videoElement.style.display = 'block';
+        fetch(resolveUrl)
+            .then(res => res.json())
+            .then(data => {
+                if (data.url) {
+                    videoElement.src = data.url;
+                    videoElement.load();
+                } else {
+                    throw new Error(data.error || 'No video URL returned');
+                }
+            })
+            .catch(err => {
+                console.log('Video resolve failed:', err);
+                if (videoLoading) {
+                    videoLoading.innerHTML = '<p>Failed to load video. Please try again.</p>';
+                } else {
+                    videoElement.style.display = 'none';
+                }
+            });
+    } else {
+        // Show video immediately
+        showVideo();
+    }
+
     // If video element exists, handle loading events
     if (videoElement) {
         videoElement.addEventListener('loadedmetadata', function() {
@@ -342,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 videoLoading.style.display = 'none';
             }
         });
-        
+
         videoElement.addEventListener('error', function() {
             console.log('Video failed to load');
             if (videoLoading) {
@@ -690,7 +733,7 @@ function copyToClipboard() {
     align-items: center;
 }
 
-.btn-watch, .btn-favorite, .btn-share {
+.btn-watch, .btn-favorite, .btn-share, .btn-download {
     padding: 0.875rem 1.75rem;
     border-radius: 50px;
     border: none;
@@ -711,11 +754,16 @@ function copyToClipboard() {
     box-shadow: var(--shadow-light);
 }
 
-.btn-favorite, .btn-share {
+.btn-favorite, .btn-share, .btn-download {
     background: rgba(255, 255, 255, 0.1);
     color: var(--white);
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
+}
+
+.btn-download:hover {
+    background: rgba(34, 197, 94, 0.8);
+    border-color: #22c55e;
 }
 
 .btn-watch:hover {

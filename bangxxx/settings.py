@@ -1,17 +1,25 @@
 import os
 from pathlib import Path
 import dj_database_url
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'your-secret-key-here-change-in-production'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.vercel.app', '.xyz', '.onrender.com']
+ALLOWED_HOSTS = [
+    'localhost', '127.0.0.1', '.vercel.app', '.xyz', '.onrender.com',
+    'nd-media.top', 'www.nd-media.top',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://nd-media.top', 'https://www.nd-media.top',
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -57,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'movies.context_processors.site_settings',
             ],
         },
     },
@@ -66,12 +75,16 @@ WSGI_APPLICATION = 'bangxxx.wsgi.application'
 
 # Database
 DATABASES = {
-    ### eamil for the account: nazaangela1991@gmail.com
-    # Supabase db
-    'default': dj_database_url.parse(
-        'postgresql://postgres.rkpigddylylflrbddzki:banger_project@aws-1-us-east-1.pooler.supabase.com:6543/postgres'
-    ),
+    'default': dj_database_url.parse(config('DATABASE_URL')),
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -112,6 +125,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "https://bangxxx.xyz",
+    "https://nd-media.top",
+    "https://www.nd-media.top",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -199,7 +214,7 @@ os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 # EMAIL_USE_TLS = True
 # EMAIL_HOST_USER = 'your-email@domain.com'
 # EMAIL_HOST_PASSWORD = 'your-email-password'
-# DEFAULT_FROM_EMAIL = 'BangXXX <noreply@your-domain.com>'
+# DEFAULT_FROM_EMAIL = 'After Dark <noreply@your-domain.com>'
 
 # Pagination
 PAGINATE_BY = 20
@@ -213,6 +228,12 @@ SCRAPER_SETTINGS = {
 }
 
 # Site settings
-SITE_NAME = 'BangXXX'
+SITE_NAME = 'After Dark'
 SITE_DESCRIPTION = 'Premium Adult Entertainment'
 SITE_URL = 'https://bangxxx.xyz'
+
+# Telegram auto-posting (see .env.example) - kept out of source control since
+# the bot token is a credential.
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='')
+TELEGRAM_CHANNEL_ID = config('TELEGRAM_CHANNEL_ID', default='')
+TELEGRAM_CHANNEL_INVITE_LINK = 'https://t.me/+clwYkcT12Es2ZTk1'

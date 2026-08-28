@@ -70,6 +70,10 @@ class Movie(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Telegram auto-posting
+    telegram_posted_at = models.DateTimeField(null=True, blank=True)
+    telegram_post_type = models.CharField(max_length=10, blank=True)  # 'link' or 'video'
+
     class Meta:
         ordering = ['-date']
         indexes = [

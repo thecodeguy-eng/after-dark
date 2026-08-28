@@ -1,10 +1,13 @@
 <!-- movies/templates/movies/partials/movie_cards.html -->
 {% for movie in movies %}
 <div class="movie-card" data-id="{{ movie.id }}">
-    <div class="movie-poster">
-        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}" 
-             alt="{{ movie.title }}" 
+    <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
+        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+             alt="{{ movie.title }}"
              loading="lazy">
+        {% if movie.video_sources.0.preview %}
+        <video class="poster-preview" muted loop playsinline preload="none"></video>
+        {% endif %}
         <button class="play-button" onclick="playMovie({{ movie.id }})" aria-label="Play {{ movie.title }}">
             <i class="fas fa-play"></i>
         </button>

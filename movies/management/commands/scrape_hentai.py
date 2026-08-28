@@ -11,7 +11,7 @@ import json
 import pytz
 from datetime import datetime
 
-API_URL = 'https://hentaiplay.net/wp-json/wp/v2/posts/'
+API_URL = 'https://pornbox247.site/wp-json/wp/v2/posts/'
 
 KNOWN_DOWNLOAD_DOMAINS = [
     'streamtape.com', 'hentaiplanet.info', 'mega.nz', 'drive.google.com',
@@ -44,7 +44,7 @@ def parse_wordpress_date(date_string):
 def extract_video_sources(soup):
     """Extract video sources from HTML content"""
     video_sources = []
-    
+
     # Look for video tags with source
     videos = soup.find_all('video')
     for video in videos:
@@ -56,17 +56,34 @@ def extract_video_sources(soup):
                     'type': source.get('type', 'video/mp4'),
                     'label': 'Source 1'
                 })
-    
-    # Look for iframes (embedded videos)
-    iframes = soup.find_all('iframe')
-    for i, iframe in enumerate(iframes, 1):
-        if iframe.get('src'):
+
+    # Look for the site's video-player embed (.mep-player-box iframe) first,
+    # since the live post page also contains unrelated iframes elsewhere on
+    # the page (ads, related widgets, etc.)
+    player_boxes = soup.select('.mep-player-box iframe, .mep-responsive-player iframe')
+    seen_urls = {v['url'] for v in video_sources}
+    for iframe in player_boxes:
+        src = iframe.get('src')
+        if src and src not in seen_urls:
             video_sources.append({
-                'url': iframe['src'],
+                'url': src,
                 'type': 'iframe',
-                'label': f'Source {i + len(video_sources)}'
+                'label': f'Source {len(video_sources) + 1}'
             })
-    
+            seen_urls.add(src)
+
+    # Fall back to any other iframes if no player box was found
+    if not player_boxes:
+        for iframe in soup.find_all('iframe'):
+            src = iframe.get('src')
+            if src and src not in seen_urls:
+                video_sources.append({
+                    'url': src,
+                    'type': 'iframe',
+                    'label': f'Source {len(video_sources) + 1}'
+                })
+                seen_urls.add(src)
+
     return video_sources
 
 def extract_download_links(soup):
@@ -80,19 +97,23 @@ def extract_download_links(soup):
         'a[class*="btn"]',
         '.su-button',
         '.download',
+        '.mep-downloads a',
+        '.mep-download-btn',
     ]
-    
+
+    seen_urls = set()
     for selector in download_selectors:
         links = soup.select(selector)
         for link in links:
             href = link.get('href')
-            if href and any(domain in href.lower() for domain in KNOWN_DOWNLOAD_DOMAINS):
+            if href and href not in seen_urls and any(domain in href.lower() for domain in KNOWN_DOWNLOAD_DOMAINS):
                 download_links.append({
                     'url': href,
                     'label': link.get_text().strip() or 'Download',
                     'type': 'direct'
                 })
-    
+                seen_urls.add(href)
+
     return download_links
 
 def extract_series_info(title):
@@ -147,7 +168,7 @@ class Command(BaseCommand):
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                                   "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                     "Accept": "application/json",
-                    "Referer": "https://hentaiplay.net/",
+                    "Referer": "https://pornbox247.site/",
                 }
 
                 response = scraper.get(API_URL, params={'page': page, 'per_page': 20}, headers=headers, timeout=15)
@@ -218,9 +239,22 @@ class Command(BaseCommand):
         modified = parse_wordpress_date(item.get('modified', ''))
         modified_gmt = parse_wordpress_date(item.get('modified_gmt', ''))
 
-        # Extract video sources and download links
-        video_sources = extract_video_sources(soup)
-        download_links = extract_download_links(soup)
+        # The WordPress REST API's content.rendered strips out the video
+        # player embed (it's injected into the front-end template only), so
+        # video sources and download links have to be scraped from the live
+        # post page instead of the API content.
+        extraction_soup = soup
+        post_link = item.get('link')
+        if post_link:
+            try:
+                live_response = scraper.get(post_link, headers=headers, timeout=15)
+                if live_response.status_code == 200:
+                    extraction_soup = BeautifulSoup(live_response.text, 'html.parser')
+            except Exception as e:
+                print(f"⚠️ Failed to fetch live page for video/download extraction: {e}")
+
+        video_sources = extract_video_sources(extraction_soup)
+        download_links = extract_download_links(extraction_soup)
 
         print(f"📹 Found {len(video_sources)} video source(s)")
         print(f"⬇️ Found {len(download_links)} download link(s)")
@@ -276,7 +310,7 @@ class Command(BaseCommand):
         if movie.featured_media_id and not movie.image_url:
             try:
                 img_response = scraper.get(
-                    f"https://hentaiplay.net/wp-json/wp/v2/media/{movie.featured_media_id}",
+                    f"https://pornbox247.site/wp-json/wp/v2/media/{movie.featured_media_id}",
                     headers=headers,
                     timeout=10
                 )
@@ -292,7 +326,7 @@ class Command(BaseCommand):
         for cat_id in item.get('categories', []):
             try:
                 cat_response = scraper.get(
-                    f"https://hentaiplay.net/wp-json/wp/v2/categories/{cat_id}",
+                    f"https://pornbox247.site/wp-json/wp/v2/categories/{cat_id}",
                     headers=headers,
                     timeout=10
                 )
@@ -313,7 +347,7 @@ class Command(BaseCommand):
         for tag_id in item.get('tags', []):
             try:
                 tag_response = scraper.get(
-                    f"https://hentaiplay.net/wp-json/wp/v2/tags/{tag_id}",
+                    f"https://pornbox247.site/wp-json/wp/v2/tags/{tag_id}",
                     headers=headers,
                     timeout=10
                 )
