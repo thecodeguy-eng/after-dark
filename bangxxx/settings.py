@@ -15,6 +15,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = [
     'localhost', '127.0.0.1', '.vercel.app', '.xyz', '.onrender.com',
     'nd-media.top', 'www.nd-media.top',
+    '10.4.166.24',  # VPS private IP - HAProxy's health checks hit this directly, bypassing the domain
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -234,7 +235,7 @@ SCRAPER_SETTINGS = {
 # Site settings
 SITE_NAME = 'After Dark'
 SITE_DESCRIPTION = 'Premium Adult Entertainment'
-SITE_URL = 'https://bangxxx.xyz'
+SITE_URL = 'https://nd-media.top'
 
 # Telegram auto-posting (see .env.example) - kept out of source control since
 # the bot token is a credential.
