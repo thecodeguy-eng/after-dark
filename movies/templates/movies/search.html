@@ -1,9 +1,15 @@
 {% extends 'movies/base.html' %}
 {% load static %}
 
-{% block title %}{{ category.name }} - After Dark{% endblock %}
+{# This page only ever receives 'query'/'movies'/'total_results' from search_view()
+   in views.py - there is no 'category' context variable here. The title/meta blocks
+   below used to reference {{ category.name }}, which Django silently renders as an
+   empty string rather than erroring, so every search results page was shipping a
+   blank/broken <title> and meta description to search engines. Fixed to use the
+   actual search term instead. #}
+{% block title %}{% if query %}"{{ query }}" search results{% else %}Search{% endif %} - After Dark{% endblock %}
 
-{% block meta_description %}Browse {{ category.name }} category on After Dark. Discover high-quality adult entertainment in this category.{% endblock %}
+{% block meta_description %}{% if query %}Search results for "{{ query }}" on After Dark - {{ total_results }} video{{ total_results|pluralize }} found.{% else %}Search After Dark's full library of adult entertainment videos.{% endif %}{% endblock %}
 
 {% block content %}
 <!-- Category Hero Section -->

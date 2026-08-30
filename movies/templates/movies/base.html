@@ -4,9 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}After Dark - Premium Adult Entertainment, Hentai, Pornhub, XNXX, BangBros, Adult Film, Anime Porn, Hentai Haven{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}After Dark - Your premium destination for adult entertainment, hentai, hentaihaven, adultfilm, anime, animepahe, crunchyroll, xnxx, pornhub, bangbros, animeporn, redtube, youporn, xvideos, brazzers, realitykings, naughtyamerica, milf, teen porn, lesbian, gay porn, amateur, hardcore, softcore, fetish, BDSM, JAV, uncensored hentai, doujinshi, manga porn, ecchi, yaoi, yuri, adult videos, free porn, premium porn, streaming adult content. Watch and download the latest content.{% endblock %}">
-    <meta name="keywords" content="hentai, hentaihaven, adultfilm, anime, animepahe, crunchyroll, xnxx, pornhub, bangbros, animeporn, redtube, youporn, xvideos, brazzers, realitykings, naughtyamerica, milf porn, teen porn, lesbian porn, gay porn, amateur porn, hardcore porn, softcore porn, fetish porn, BDSM porn, JAV porn, uncensored hentai, doujinshi, manga porn, ecchi anime, yaoi hentai, yuri hentai, adult videos, free porn videos, premium adult entertainment, streaming porn, download porn, adult movies, erotic content, sex videos, nude scenes, pornstars, webcam shows, live cams, VR porn, 4K porn, HD adult films">
+    {# This title/description pair is what the HOMEPAGE actually ships, since it's
+       the one page in the site that doesn't override these blocks itself (every
+       other page - category/series/detail/search/etc - sets its own). The old
+       version here was a ~600-character keyword-stuffed dump listing rival brand
+       names (Pornhub, XNXX, BangBros...), which both falsely implies affiliation
+       with those sites and is the kind of keyword-stuffing Google's spam policies
+       actively penalize rather than reward - on top of being 4x past the ~155-160
+       character length search engines actually display before truncating.
+       Replaced with a real, concise, honest description. The <meta name="keywords">
+       tag below is also gone entirely - Google has publicly ignored it for ranking
+       since 2009, so it was pure page weight with zero SEO benefit. #}
+    <title>{% block title %}After Dark - Premium Adult Entertainment{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}After Dark - HD adult videos updated daily. Stream and download for free, no sign-up required.{% endblock %}">
     
     <!-- Favicon -->
     <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
@@ -1231,12 +1241,6 @@ function resetAge() {
         </nav>
     </header>
 
-    <!-- Telegram VIP promo banner -->
-    <div class="vip-promo-banner">
-        <p>🔞 The After Dark community lives on Telegram — new drops daily</p>
-        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">Join Now</a>
-    </div>
-
     <!-- Adsterra Banner (728x90) -->
     <div class="ad-banner-slot">
         <script>
@@ -1249,6 +1253,16 @@ function resetAge() {
           };
         </script>
         <script src="https://www.highrevenueformat.com/496b92fdcf44274220d189c43553327e/invoke.js"></script>
+    </div>
+
+    <!-- Telegram VIP promo banner - placed after the ad banner (rather than
+         right under the header) so it isn't hidden behind the push-style
+         popup ads that tend to render near the very top of the page, and so
+         it fills the space the banner ad slot leaves behind on mobile
+         (that slot is hidden below 768px - see .ad-banner-slot media query). -->
+    <div class="vip-promo-banner">
+        <p>🔥 Unlock full HD &amp; 4K videos — join the After Dark VIP channel on Telegram</p>
+        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">Join Now</a>
     </div>
 
     <!-- Main Content -->
