@@ -133,12 +133,14 @@
                 {% for movie in movies %}
                 <div class="movie-card" data-id="{{ movie.id }}">
                     <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
-                        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
-                             alt="{{ movie.title }}"
-                             loading="lazy">
-                        {% if movie.video_sources.0.preview %}
-                        <video class="poster-preview" muted loop playsinline preload="none"></video>
-                        {% endif %}
+                        <a href="{{ movie.get_absolute_url }}" class="poster-link" aria-label="Watch {{ movie.title }}">
+                            <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                                 alt="{{ movie.title }}"
+                                 loading="lazy">
+                            {% if movie.video_sources.0.preview %}
+                            <video class="poster-preview" muted loop playsinline preload="none"></video>
+                            {% endif %}
+                        </a>
                         <div class="movie-overlay">
                             <button class="play-button" onclick="window.location.href='{{ movie.get_absolute_url }}'">
                                 <i class="fas fa-play"></i>
@@ -512,11 +514,16 @@
         align-items: center;
         justify-content: center;
         opacity: 0;
+        pointer-events: none;
         transition: opacity 0.3s ease;
     }
 
     .movie-card:hover .movie-overlay {
         opacity: 1;
+    }
+
+    .movie-overlay .play-button {
+        pointer-events: auto;
     }
 
     .movie-actions {
@@ -527,7 +534,12 @@
         flex-direction: column;
         gap: 10px;
         opacity: 0;
+        pointer-events: none;
         transition: opacity 0.3s ease;
+    }
+
+    .movie-card:hover .movie-actions {
+        pointer-events: auto;
     }
 
     .movie-card:hover .movie-actions {

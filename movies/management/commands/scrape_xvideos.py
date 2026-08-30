@@ -98,6 +98,11 @@ class Command(BaseCommand):
             '--list-categories', action='store_true',
             help='Print every available category slug and exit without scraping.'
         )
+        parser.add_argument(
+            '--limit', type=int, default=None,
+            help='Stop after this many NEW videos are created (across all categories/pages in this run). '
+                 'Videos already in the database don\'t count against the limit.'
+        )
 
     def handle(self, *args, **options):
         scraper = cloudscraper.create_scraper()
@@ -111,9 +116,12 @@ class Command(BaseCommand):
         category_slug = options['category']
         startpage = options['startpage']
         endpage = options['endpage']
+        self.limit = options['limit']
+        self.created_count = 0
 
         if category_slug:
             self.scrape_category(scraper, category_slug, startpage, endpage)
+            print(f"\n✅ Done. {self.created_count} new video(s) created.")
             return
 
         print("🔎 No category given - discovering all categories to scrape everything...")
@@ -121,12 +129,19 @@ class Command(BaseCommand):
         print(f"📋 Found {len(categories)} categories.")
 
         for slug, name in categories:
+            if self.limit is not None and self.created_count >= self.limit:
+                break
             print(f"\n===== 📂 Category: {name} ({slug}) =====")
-            self.scrape_category(scraper, slug, startpage, endpage)
+            self.scrape_category(scraper, slug, startpage, endpage, category_name=name)
             time.sleep(2)  # be polite between categories
 
-    def scrape_category(self, scraper, category_slug, startpage, endpage):
-        category_name = category_display_name(category_slug)
+        print(f"\n✅ Done. {self.created_count} new video(s) created.")
+
+    def scrape_category(self, scraper, category_slug, startpage, endpage, category_name=None):
+        # Use the accurate name discovered from xvideos' own nav when available
+        # (e.g. 'Black' for Black_Woman-30) rather than a generic derivation
+        # from the slug (which would produce the clunkier 'Black Woman').
+        category_name = category_name or category_display_name(category_slug)
         category, _ = Category.objects.get_or_create(
             name=category_name,
             defaults={'slug': slugify(category_name)}
@@ -141,6 +156,10 @@ class Command(BaseCommand):
         while True:
             if endpage is not None and page > endpage:
                 print("✅ Reached end page limit.")
+                break
+
+            if self.limit is not None and self.created_count >= self.limit:
+                print(f"✅ Reached limit of {self.limit} new videos.")
                 break
 
             url = base_url if page == 0 else f'{base_url}/{page}'
@@ -167,6 +186,8 @@ class Command(BaseCommand):
                 break
 
             for block in blocks:
+                if self.limit is not None and self.created_count >= self.limit:
+                    break
                 try:
                     self.process_block(block, category)
                 except Exception as e:
@@ -214,6 +235,7 @@ class Command(BaseCommand):
         movie.categories.add(category)
 
         if created:
+            self.created_count += 1
             print(f"✅ Created new movie: {data['title']}")
         else:
             print(f"ℹ️ Already exists: {data['title']}")

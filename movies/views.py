@@ -75,10 +75,18 @@ class HomeView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Featured spotlight: xvideos has no "African" category, so this
+        # matches on "Black" (and any older "Black Woman" naming from before
+        # the category-name fix) as the closest available signal.
+        context['black_movies'] = Movie.objects.filter(
+            status='publish', categories__name__icontains='black'
+        ).distinct().order_by('-date').select_related().prefetch_related('categories', 'tags')[:12]
+
         context['featured_movies'] = Movie.objects.filter(
             status='publish', is_sticky=True
         ).select_related().prefetch_related('categories', 'tags')[:6]
-        
+
         context['recent_movies'] = Movie.objects.filter(
             status='publish'
         ).select_related().prefetch_related('categories', 'tags')[:12]

@@ -7,6 +7,8 @@
 
 {% block meta_description %}Watch {{ movie.title }} on After Dark. {{ movie.excerpt|truncatewords:20|default:"Premium adult entertainment content." }}{% endblock %}
 
+{% block native_banner_footer %}{% endblock %}
+
 {% block content %}
 <div class="movie-detail-container">
     <!-- Movie Hero Section -->
@@ -109,6 +111,11 @@
                                 <small><i class="fas fa-info-circle"></i> Download link is resolved fresh each time - it may take a moment to load</small>
                             </div>
                         </div>
+
+                        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="btn-watch-full-cta">
+                            <i class="fas fa-download"></i>
+                            Click Here To Watch Full Video
+                        </a>
                     </div>
                 </div>
             </div>
@@ -193,6 +200,11 @@
             </div>
         </div>
     </section>
+
+    <div class="ad-native-slot">
+        <script async="async" data-cfasync="false" src="https://pl31085306.profitableratecpmnetwork.com/8bfcba54dca0af5ac3c26568d5732cf3/invoke.js"></script>
+        <div id="container-8bfcba54dca0af5ac3c26568d5732cf3"></div>
+    </div>
     {% endif %}
 
     <!-- Series Episodes Section -->
@@ -577,6 +589,10 @@ function copyToClipboard() {
     z-index: 1;
 }
 
+.hero-content > * {
+    min-width: 0;
+}
+
 /* Movie Poster */
 .poster-wrapper {
     position: relative;
@@ -644,13 +660,16 @@ function copyToClipboard() {
 .movie-info-section {
     color: var(--white);
     padding-top: 1rem;
+    min-width: 0;
 }
 
 .movie-title {
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: clamp(1.5rem, 4vw, 3rem);
     font-weight: 800;
     margin-bottom: 1.5rem;
     line-height: 1.2;
+    overflow-wrap: break-word;
+    word-break: break-word;
     background: var(--gradient-gold);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -731,6 +750,35 @@ function copyToClipboard() {
     flex-wrap: wrap;
     gap: 1rem;
     align-items: center;
+}
+
+.btn-watch-full-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--gradient-red);
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border-radius: 12px;
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+    animation: watchFullPulse 2.5s ease-out infinite;
+    transition: transform 0.2s ease;
+}
+
+.btn-watch-full-cta:hover {
+    transform: translateY(-2px);
+}
+
+@keyframes watchFullPulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+    70% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
 
 .btn-watch, .btn-favorite, .btn-share, .btn-download {
@@ -1100,22 +1148,22 @@ function copyToClipboard() {
 }
 
 .related-card {
-    background: var(--medium-gray);
-    border-radius: var(--border-radius);
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     transition: var(--transition-smooth);
 }
 
 .related-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-medium);
-    border-color: var(--primary-gold);
+    border-color: rgba(220, 38, 38, 0.3);
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.15);
 }
 
 .related-poster {
     position: relative;
-    aspect-ratio: 2/3;
+    aspect-ratio: 16/9;
     overflow: hidden;
 }
 
@@ -1162,20 +1210,23 @@ function copyToClipboard() {
 }
 
 .related-info {
-    padding: 1rem;
+    padding: 12px;
 }
 
 .related-title {
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
 }
 
 .related-title a {
     color: var(--white);
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 14px;
     font-weight: 600;
     line-height: 1.3;
     display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: var(--transition-smooth);
 }
 
@@ -1187,14 +1238,18 @@ function copyToClipboard() {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.8rem;
-    color: var(--text-gray);
+    font-size: 13px;
+    color: #e2e8f0;
 }
 
 .views {
     display: flex;
     align-items: center;
     gap: 0.25rem;
+}
+
+.views i {
+    color: var(--primary-red);
 }
 
 /* Modal Styles */

@@ -2,19 +2,21 @@
 {% for movie in movies %}
 <div class="movie-card" data-id="{{ movie.id }}">
     <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
-        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
-             alt="{{ movie.title }}"
-             loading="lazy">
-        {% if movie.video_sources.0.preview %}
-        <video class="poster-preview" muted loop playsinline preload="none"></video>
-        {% endif %}
-        <button class="play-button" onclick="playMovie({{ movie.id }})" aria-label="Play {{ movie.title }}">
-            <i class="fas fa-play"></i>
-        </button>
-        <div class="movie-duration">
-            <i class="fas fa-clock"></i>
-            {% if movie.video_sources %}HD{% else %}Preview{% endif %}
-        </div>
+        <a href="{{ movie.get_absolute_url }}" class="poster-link" aria-label="Watch {{ movie.title }}">
+            <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                 alt="{{ movie.title }}"
+                 loading="lazy">
+            {% if movie.video_sources.0.preview %}
+            <video class="poster-preview" muted loop playsinline preload="none"></video>
+            {% endif %}
+            <span class="play-button" aria-hidden="true">
+                <i class="fas fa-play"></i>
+            </span>
+            <div class="movie-duration">
+                <i class="fas fa-clock"></i>
+                {% if movie.video_sources %}HD{% else %}Preview{% endif %}
+            </div>
+        </a>
     </div>
     <div class="movie-info">
         <h3 class="movie-title">

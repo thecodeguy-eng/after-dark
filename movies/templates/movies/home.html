@@ -4,6 +4,53 @@
 {% block title %}After Dark - Premium Adult Entertainment{% endblock %}
 
 {% block content %}
+<!-- Black & African Spotlight -->
+{% if black_movies %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">
+            <i class="fas fa-fire"></i>
+            Black &amp; African Spotlight
+        </h2>
+        <div class="movie-grid">
+            {% for movie in black_movies %}
+            <div class="movie-card" data-id="{{ movie.id }}">
+                <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
+                    <a href="{{ movie.get_absolute_url }}" class="poster-link" aria-label="Watch {{ movie.title }}">
+                        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                             alt="{{ movie.title }}"
+                             loading="lazy">
+                        {% if movie.video_sources.0.preview %}
+                        <video class="poster-preview" muted loop playsinline preload="none"></video>
+                        {% endif %}
+                        <span class="play-button" aria-hidden="true">
+                            <i class="fas fa-play"></i>
+                        </span>
+                        <div class="movie-duration">
+                            <i class="fas fa-clock"></i>
+                            {% if movie.video_sources %}HD{% else %}Preview{% endif %}
+                        </div>
+                    </a>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">
+                        <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+                    </h3>
+                    <div class="movie-meta">
+                        <span class="views">
+                            <i class="fas fa-eye"></i>
+                            {{ movie.view_count|default:0 }}
+                        </span>
+                        <span class="date">{{ movie.date|date:"M d" }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Featured Movies Section -->
 {% if featured_movies %}
 <section class="section">
@@ -45,37 +92,6 @@
 </section>
 {% endif %}
 
-<!-- Categories Section -->
-<section class="section">
-    <div class="container">
-        <h2 class="section-title">
-            <i class="fas fa-th-large"></i>
-            Browse Categories
-        </h2>
-        <div class="category-grid">
-            {% for category in categories %}
-            <a href="{% url 'movies:category' category.slug %}" class="category-card">
-                <div class="category-icon">
-                    <i class="fas fa-folder"></i>
-                </div>
-                <h1 class="category-name">{{ category.name }}</h1>
-                <span class="category-count">{{ category.movie_count }} videos</span>
-                <div class="category-arrow">
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-        <div class="text-center mt-40">
-            <a href="{% url 'movies:all_categories' %}" class="btn-primary">
-                View All Categories
-                <i class="fas fa-arrow-right"></i>
-            </a>
-        </div>
-    </div>
-</section>
-
-
 <!-- Recent Movies Section -->
 <section class="section">
     <div class="container">
@@ -87,19 +103,21 @@
             {% for movie in recent_movies %}
             <div class="movie-card" data-id="{{ movie.id }}">
                 <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
-                    <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
-                         alt="{{ movie.title }}"
-                         >
-                    {% if movie.video_sources.0.preview %}
-                    <video class="poster-preview" muted loop playsinline preload="none"></video>
-                    {% endif %}
-                    <button class="play-button" onclick="playMovie({{ movie.id }})" aria-label="Play {{ movie.title }}">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <div class="movie-duration">
-                        <i class="fas fa-clock"></i>
-                        {% if movie.video_sources %}HD{% else %}Preview{% endif %}
-                    </div>
+                    <a href="{{ movie.get_absolute_url }}" class="poster-link" aria-label="Watch {{ movie.title }}">
+                        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                             alt="{{ movie.title }}"
+                             >
+                        {% if movie.video_sources.0.preview %}
+                        <video class="poster-preview" muted loop playsinline preload="none"></video>
+                        {% endif %}
+                        <span class="play-button" aria-hidden="true">
+                            <i class="fas fa-play"></i>
+                        </span>
+                        <div class="movie-duration">
+                            <i class="fas fa-clock"></i>
+                            {% if movie.video_sources %}HD{% else %}Preview{% endif %}
+                        </div>
+                    </a>
                 </div>
                 <div class="movie-info">
                     <h3 class="movie-title">
@@ -181,6 +199,36 @@
     </div>
 </section>
 {% endif %}
+
+<!-- Categories Section -->
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">
+            <i class="fas fa-th-large"></i>
+            Browse Categories
+        </h2>
+        <div class="category-grid">
+            {% for category in categories %}
+            <a href="{% url 'movies:category' category.slug %}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <h1 class="category-name">{{ category.name }}</h1>
+                <span class="category-count">{{ category.movie_count }} videos</span>
+                <div class="category-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-40">
+            <a href="{% url 'movies:all_categories' %}" class="btn-primary">
+                View All Categories
+                <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block extra_css %}
