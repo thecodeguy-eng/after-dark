@@ -5,7 +5,7 @@ from movies.models import Movie, Category
 import re
 import time
 import cloudscraper
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 from bs4 import BeautifulSoup
 
 BASE_URL = 'https://www.xvideos.com'
@@ -103,6 +103,13 @@ class Command(BaseCommand):
             help='Stop after this many NEW videos are created (across all categories/pages in this run). '
                  'Videos already in the database don\'t count against the limit.'
         )
+        parser.add_argument(
+            '--search', type=str, default=None,
+            help='Scrape xvideos search results for this query instead of browsing a category '
+                 '(e.g. --search naija). xvideos has no dedicated Nigeria/Africa category, so this '
+                 'is the way to target that content. All results are tagged with a category named '
+                 'after the query (title-cased), e.g. --search naija -> category "Naija".'
+        )
 
     def handle(self, *args, **options):
         scraper = cloudscraper.create_scraper()
@@ -118,6 +125,11 @@ class Command(BaseCommand):
         endpage = options['endpage']
         self.limit = options['limit']
         self.created_count = 0
+
+        if options['search']:
+            self.scrape_search(scraper, options['search'], startpage, endpage)
+            print(f"\n✅ Done. {self.created_count} new video(s) created.")
+            return
 
         if category_slug:
             self.scrape_category(scraper, category_slug, startpage, endpage)
@@ -183,6 +195,67 @@ class Command(BaseCommand):
 
             if not blocks:
                 print("✅ No more videos found. Finished category.")
+                break
+
+            for block in blocks:
+                if self.limit is not None and self.created_count >= self.limit:
+                    break
+                try:
+                    self.process_block(block, category)
+                except Exception as e:
+                    print(f"💥 Error processing video: {e}")
+                    continue
+
+            page += 1
+            time.sleep(1.5)  # be polite between page requests
+
+    def scrape_search(self, scraper, query, startpage, endpage):
+        # NOTE: this hits xvideos' search results page rather than a category
+        # browse page. The URL pattern (?k=<query>&p=<page>) is based on
+        # xvideos' long-standing, stable search scheme, but - unlike
+        # scrape_category(), which has been run and confirmed working - this
+        # path has not been exercised against the live site. Verify the first
+        # run's output before relying on it in cron.
+        category_name = query.strip().title()
+        category, _ = Category.objects.get_or_create(
+            name=category_name,
+            defaults={'slug': slugify(category_name)}
+        )
+
+        page = startpage
+        consecutive_errors = 0
+        max_consecutive_errors = 5
+
+        while True:
+            if endpage is not None and page > endpage:
+                print("✅ Reached end page limit.")
+                break
+
+            if self.limit is not None and self.created_count >= self.limit:
+                print(f"✅ Reached limit of {self.limit} new videos.")
+                break
+
+            url = f'{BASE_URL}/?k={quote(query)}&p={page}'
+
+            try:
+                print(f"\n🌐 Fetching search '{query}' page {page}...")
+                response = scraper.get(url, headers=HEADERS, timeout=15)
+                response.raise_for_status()
+            except Exception as e:
+                print(f"🔥 Request failed: {e}")
+                consecutive_errors += 1
+                if consecutive_errors >= max_consecutive_errors:
+                    print(f"❌ Too many consecutive errors ({consecutive_errors}). Stopping search.")
+                    return
+                time.sleep(5)
+                continue
+
+            consecutive_errors = 0
+            soup = BeautifulSoup(response.text, 'html.parser')
+            blocks = extract_video_blocks(soup)
+
+            if not blocks:
+                print("✅ No more results found. Finished search.")
                 break
 
             for block in blocks:

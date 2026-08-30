@@ -4,6 +4,53 @@
 {% block title %}After Dark - Premium Adult Entertainment{% endblock %}
 
 {% block content %}
+<!-- Naija Spotlight -->
+{% if naija_movies %}
+<section class="section">
+    <div class="container">
+        <h2 class="section-title">
+            <i class="fas fa-fire"></i>
+            🇳🇬 Naija Spotlight
+        </h2>
+        <div class="movie-grid">
+            {% for movie in naija_movies %}
+            <div class="movie-card" data-id="{{ movie.id }}">
+                <div class="movie-poster"{% if movie.video_sources.0.preview %} data-preview-url="{{ movie.video_sources.0.preview }}"{% endif %}>
+                    <a href="{{ movie.get_absolute_url }}" class="poster-link" aria-label="Watch {{ movie.title }}">
+                        <img src="{{ movie.image_url|default:'/static/default-poster.jpg' }}"
+                             alt="{{ movie.title }}"
+                             loading="lazy">
+                        {% if movie.video_sources.0.preview %}
+                        <video class="poster-preview" muted loop playsinline preload="none"></video>
+                        {% endif %}
+                        <span class="play-button" aria-hidden="true">
+                            <i class="fas fa-play"></i>
+                        </span>
+                        <div class="movie-duration">
+                            <i class="fas fa-clock"></i>
+                            {% if movie.video_sources %}HD{% else %}Preview{% endif %}
+                        </div>
+                    </a>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">
+                        <a href="{{ movie.get_absolute_url }}">{{ movie.title }}</a>
+                    </h3>
+                    <div class="movie-meta">
+                        <span class="views">
+                            <i class="fas fa-eye"></i>
+                            {{ movie.view_count|default:0 }}
+                        </span>
+                        <span class="date">{{ movie.date|date:"M d" }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- Black & African Spotlight -->
 {% if black_movies %}
 <section class="section">

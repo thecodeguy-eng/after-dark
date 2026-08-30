@@ -83,6 +83,13 @@ class HomeView(ListView):
             status='publish', categories__name__icontains='black'
         ).distinct().order_by('-date').select_related().prefetch_related('categories', 'tags')[:12]
 
+        # Populated by `scrape_xvideos --search naija` (see that command for why
+        # a search-based scrape is used instead of a category - xvideos has no
+        # Nigeria/Naija category to browse).
+        context['naija_movies'] = Movie.objects.filter(
+            status='publish', categories__name__icontains='naija'
+        ).distinct().order_by('-date').select_related().prefetch_related('categories', 'tags')[:12]
+
         context['featured_movies'] = Movie.objects.filter(
             status='publish', is_sticky=True
         ).select_related().prefetch_related('categories', 'tags')[:6]
