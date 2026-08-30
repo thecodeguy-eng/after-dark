@@ -5,11 +5,13 @@ Two post types:
 - 'video' - downloads the resolved direct mp4 and uploads it natively to the
             channel, so it plays inline in Telegram without leaving the app.
 """
+import io
 import os
 import tempfile
 
 import requests
 from django.conf import settings
+from PIL import Image, ImageDraw
 
 from .utils import find_xvideos_embed_url, resolve_xvideos_direct_urls
 
@@ -44,6 +46,49 @@ def _movie_url(movie):
     return f"{settings.SITE_URL.rstrip('/')}{movie.get_absolute_url()}"
 
 
+def _thumbnail_with_play_button(image_url):
+    """Download a thumbnail and draw a play-button icon on top of it.
+
+    Sending this composited image ourselves (instead of just linking to the
+    movie page and letting Telegram generate its own preview) means every
+    post looks like a consistent video card - Telegram's auto-generated link
+    previews pull whatever OpenGraph image/branding the source site happens
+    to have, which looks inconsistent post to post.
+    """
+    response = requests.get(image_url, timeout=15)
+    response.raise_for_status()
+
+    image = Image.open(io.BytesIO(response.content)).convert('RGBA')
+    width, height = image.size
+
+    overlay = Image.new('RGBA', image.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    radius = int(min(width, height) * 0.16)
+    cx, cy = width // 2, height // 2
+    draw.ellipse(
+        (cx - radius, cy - radius, cx + radius, cy + radius),
+        fill=(220, 38, 38, 220),
+    )
+
+    triangle_size = radius * 0.9
+    offset = triangle_size * 0.15  # nudge right so the triangle looks visually centered
+    draw.polygon(
+        [
+            (cx - triangle_size / 2 + offset, cy - triangle_size / 2),
+            (cx - triangle_size / 2 + offset, cy + triangle_size / 2),
+            (cx + triangle_size / 2 + offset, cy),
+        ],
+        fill=(255, 255, 255, 255),
+    )
+
+    composited = Image.alpha_composite(image, overlay).convert('RGB')
+    buffer = io.BytesIO()
+    composited.save(buffer, format='JPEG', quality=90)
+    buffer.seek(0)
+    return buffer
+
+
 def post_link(movie):
     """Send a thumbnail + caption + link post for a movie."""
     _require_config()
@@ -52,11 +97,20 @@ def post_link(movie):
     caption = caption[:1024]
 
     if movie.image_url:
-        return _call('sendPhoto', data={
-            'chat_id': settings.TELEGRAM_CHANNEL_ID,
-            'photo': movie.image_url,
-            'caption': caption,
-        })
+        try:
+            photo = _thumbnail_with_play_button(movie.image_url)
+            return _call('sendPhoto', data={
+                'chat_id': settings.TELEGRAM_CHANNEL_ID,
+                'caption': caption,
+            }, files={'photo': ('thumbnail.jpg', photo, 'image/jpeg')})
+        except Exception:
+            # Fall back to the plain thumbnail URL if compositing fails for
+            # any reason (bad image data, unreachable host, etc.)
+            return _call('sendPhoto', data={
+                'chat_id': settings.TELEGRAM_CHANNEL_ID,
+                'photo': movie.image_url,
+                'caption': caption,
+            })
 
     return _call('sendMessage', data={
         'chat_id': settings.TELEGRAM_CHANNEL_ID,
