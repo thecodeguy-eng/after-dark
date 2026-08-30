@@ -412,6 +412,44 @@
             filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
         }
 
+        /* ===== VIP PROMO BANNER ===== */
+        .vip-promo-banner {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(10px, 3vw, 20px);
+            padding: clamp(12px, 2.5vh, 18px) clamp(16px, 4vw, 32px);
+            background: var(--gradient-crimson);
+            text-align: center;
+        }
+
+        .vip-promo-banner p {
+            margin: 0;
+            color: var(--white);
+            font-weight: 700;
+            font-size: clamp(13px, 2.2vw, 16px);
+        }
+
+        .vip-promo-btn {
+            display: inline-block;
+            flex-shrink: 0;
+            background: var(--gradient-gold);
+            color: var(--primary-black);
+            text-decoration: none;
+            font-weight: 800;
+            font-size: clamp(12px, 2vw, 14px);
+            padding: 8px 20px;
+            border-radius: 20px;
+            white-space: nowrap;
+            transition: var(--transition-smooth);
+        }
+
+        .vip-promo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow-gold);
+        }
+
         /* ===== AD SLOTS ===== */
         .ad-banner-slot {
             display: flex;

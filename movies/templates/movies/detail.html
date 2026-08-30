@@ -1412,7 +1412,14 @@ function copyToClipboard() {
         gap: 2rem;
         text-align: center;
     }
-    
+
+    /* The video player further down already shows this same thumbnail as its
+       poster frame, so a big static duplicate up top just wastes mobile
+       screen space. */
+    .movie-poster-section {
+        display: none;
+    }
+
     .movie-meta {
         justify-content: center;
     }
