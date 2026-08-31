@@ -430,11 +430,6 @@
             justify-content: center;
             gap: clamp(10px, 3vw, 20px);
             padding: clamp(12px, 2.5vh, 18px) clamp(16px, 4vw, 32px);
-            /* Margin (not just padding) so there's real breathing room above
-               this banner, since third-party ad units (popups, notification-
-               style ads) tend to anchor near the very top of the page and can
-               otherwise end up visually crowding or overlapping it. */
-            margin-top: clamp(16px, 3vh, 28px);
             background: var(--gradient-crimson);
             text-align: center;
         }
@@ -1119,20 +1114,20 @@
         <script src="https://www.highrevenueformat.com/496b92fdcf44274220d189c43553327e/invoke.js"></script>
     </div>
 
-    <!-- Telegram VIP promo banner - placed after the ad banner (rather than
-         right under the header) so it isn't hidden behind the push-style
-         popup ads that tend to render near the very top of the page, and so
-         it fills the space the banner ad slot leaves behind on mobile
-         (that slot is hidden below 768px - see .ad-banner-slot media query). -->
-    <div class="vip-promo-banner">
-        <p>🔥 VIP members get every video in full HD &amp; 4K — join free on Telegram</p>
-        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">Unlock Access</a>
-    </div>
-
     <!-- Main Content -->
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Telegram VIP promo banner - placed after all page content (not near
+         the top) because the fake-chat social-bar ad renders as a fixed
+         overlay near the top of the viewport for several seconds after load
+         and was covering/clipping this banner no matter how much top margin
+         it got. Nothing ad-related ever renders down here. -->
+    <div class="vip-promo-banner">
+        <p>🔥 VIP members get every video in full HD &amp; 4K — join free on Telegram</p>
+        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">Unlock Access</a>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
