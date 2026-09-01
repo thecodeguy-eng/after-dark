@@ -7,6 +7,10 @@
 
 {% block meta_description %}Watch {{ movie.title }} on After Dark. {{ movie.excerpt|truncatewords:20|default:"Premium adult entertainment content." }}{% endblock %}
 
+{% block og_title %}{{ movie.title }} - After Dark{% endblock %}
+{% block og_description %}Watch {{ movie.title }} on After Dark. {{ movie.excerpt|truncatewords:20|default:"Premium adult entertainment content." }}{% endblock %}
+{% block og_image %}{{ movie.image_url }}{% endblock %}
+
 {% block native_banner_footer %}{% endblock %}
 
 <!-- Monetag popunder here instead of Adsterra (the site-wide default) - this
@@ -18,111 +22,8 @@
 
 {% block content %}
 <div class="movie-detail-container">
-    <!-- Movie Hero Section -->
-    <section class="movie-hero">
-        <div class="hero-background">
-            {% if movie.image_url %}
-            <img src="{{ movie.image_url }}" alt="{{ movie.title }}" class="hero-bg-image">
-            {% endif %}
-            <div class="hero-overlay"></div>
-        </div>
-        
-        <div class="container">
-            <div class="hero-content">
-                <!-- Movie Information -->
-                <div class="movie-info-section">
-                    <div class="movie-header">
-                        <h1 class="movie-title">{{ movie.title }}</h1>
-                        
-                        <!-- Movie Meta -->
-                        <div class="movie-meta">
-                            <div class="meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span>{{ movie.date|date:"F d, Y" }}</span>
-                            </div>
-                            <div class="meta-item">
-                                <i class="fas fa-eye"></i>
-                                <span>{{ movie.view_count|default:0|floatformat:0 }} views</span>
-                            </div>
-                            <!-- {% if movie.video_sources %}
-                            <div class="meta-item">
-                                <i class="fas fa-video"></i>
-                                <span>{{ movie.video_sources|length }} source{{ movie.video_sources|length|pluralize }}</span>
-                            </div>
-                            {% endif %} -->
-                            <div class="meta-item">
-                                <i class="fas fa-star"></i>
-                                <!-- <span>{{ movie.view_count|calc_rating }}/5</span> -->
-                            </div>
-                        </div>
-                        
-                        <!-- Categories -->
-                        {% if movie.categories.all %}
-                        <div class="movie-categories">
-                            {% for category in movie.categories.all %}
-                            <a href="{% url 'movies:category' category.slug %}" class="category-badge">
-                                {{ category.name }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Description -->
-                        {% if movie.excerpt %}
-                        <div class="movie-description">
-                            <p>{{ movie.excerpt|safe|truncatewords:50 }}</p>
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Action Buttons -->
-                        <div class="action-buttons">
-                            {% if movie.video_sources %}
-                            <button class="btn-watch" onclick="scrollToPlayer()">
-                                <i class="fas fa-play"></i>
-                                Watch Now
-                            </button>
-                            {% endif %}
-                            
-                            <button class="btn-favorite" onclick="toggleFavorite({{ movie.id }})">
-                                <i class="far fa-heart"></i>
-                                Favorite
-                            </button>
-                            
-                            <button class="btn-share" onclick="showShareModal()">
-                                <i class="fas fa-share-alt"></i>
-                                Share
-                            </button>
 
-                            {% if movie.video_sources %}
-                            <a class="btn-download" href="{% url 'movies:download_movie' movie.id %}" target="_blank" rel="noopener">
-                                <i class="fas fa-download"></i>
-                                Download
-                            </a>
-                            {% endif %}
-
-                            <div class="download-info-text">
-                                <small><i class="fas fa-info-circle"></i> Download link is resolved fresh each time - it may take a moment to load</small>
-                            </div>
-                        </div>
-
-                        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="btn-watch-full-cta">
-                            <i class="fas fa-download"></i>
-                            Click Here To Watch Full Video
-                        </a>
-
-                        {% if movie.video_sources %}
-                        <div class="ad-native-slot">
-                            <script async="async" data-cfasync="false" src="https://pl31085306.profitableratecpmnetwork.com/8bfcba54dca0af5ac3c26568d5732cf3/invoke.js"></script>
-                            <div id="container-8bfcba54dca0af5ac3c26568d5732cf3"></div>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Video Player Section -->
+        <!-- Video Player Section -->
     {% if movie.video_sources %}
     <section class="video-player-section" id="video-player">
         <div class="container">
@@ -187,14 +88,14 @@
                 
                 <div class="player-footer">
                     <div class="now-playing">
-                        <h3>{{ movie.title }}</h3>
+                        <!-- <h3>{{ movie.title }}</h3> -->
                         <p class="video-info">Quality: HD | Status: Ready to play</p>
-                        <small><i class="fas fa-info-circle" style="color: red;"></i> Use the Download button above to save this video</small>
+                        <small><i class="fas fa-info-circle" style="color: red;"></i> Use the Download button below to save this video</small>
                     </div>
                     <div class="player-stats">
                         <span>{{ movie.view_count|default:0|floatformat:0 }} views</span>
-                        <span class="separator">•</span>
-                        <span>{{ movie.date|date:"M d, Y" }}</span>
+                        <!-- <span class="separator">•</span> -->
+                        <!-- <span>{{ movie.date|date:"M d, Y" }}</span> -->
                     </div>
                 </div>
             </div>
@@ -249,6 +150,127 @@
         </div>
     </section>
     {% endif %}
+    <a href="https://www.profitableratecpmnetwork.com/cbid6fi0y?key=8e6679469956434493b386af64d1dcfb" target="_blank" rel="noopener" class="btn-watch-full-cta">
+        <i class="fas fa-download"></i>
+            Click Here To Watch Full Video
+    </a>
+
+    <br>
+
+     <a class="btn-download" href="https://www.profitableratecpmnetwork.com/cbid6fi0y?key=8e6679469956434493b386af64d1dcfb" target="_blank" rel="noopener">
+        <i class="fas fa-download"></i>
+            Click here to Download
+    </a>
+    
+                    
+    <!-- Movie Hero Section -->
+    <section class="movie-hero">
+        <div class="hero-background">
+            {% if movie.image_url %}
+            <img src="{{ movie.image_url }}" alt="{{ movie.title }}" class="hero-bg-image">
+            {% endif %}
+            <div class="hero-overlay"></div>
+        </div>
+        
+        <div class="container">
+            <div class="hero-content">
+                <!-- Movie Information -->
+                <div class="movie-info-section">
+                    <div class="movie-header">
+                        <!-- <h1 class="movie-title">{{ movie.title }}</h1> -->
+                        
+                        <!-- Movie Meta -->
+                        <div class="movie-meta">
+                            <!-- <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ movie.date|date:"F d, Y" }}</span>
+                            </div> -->
+                            <!-- <div class="meta-item">
+                                <i class="fas fa-eye"></i>
+                                <span>{{ movie.view_count|default:0|floatformat:0 }} views</span>
+                            </div> -->
+                            <!-- {% if movie.video_sources %}
+                            <div class="meta-item">
+                                <i class="fas fa-video"></i>
+                                <span>{{ movie.video_sources|length }} source{{ movie.video_sources|length|pluralize }}</span>
+                            </div>
+                            {% endif %} -->
+                            <!-- <div class="meta-item">
+                                <i class="fas fa-star"></i>
+                                <span>{{ movie.view_count|calc_rating }}/5</span>
+                            </div> -->
+                        </div>
+                        
+                        <!-- Categories -->
+                        <!-- {% if movie.categories.all %}
+                        <div class="movie-categories">
+                            {% for category in movie.categories.all %}
+                            <a href="{% url 'movies:category' category.slug %}" class="category-badge">
+                                {{ category.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% endif %} -->
+                        
+                        <!-- Description -->
+                        <!-- {% if movie.excerpt %}
+                        <div class="movie-description">
+                            <p>{{ movie.excerpt|safe|truncatewords:50 }}</p>
+                        </div>
+                        {% endif %} -->
+                        
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <!-- {% if movie.video_sources %}
+                            <button class="btn-watch" onclick="scrollToPlayer()">
+                                <i class="fas fa-play"></i>
+                                Click here to Watch Full Video
+                            </button>
+                            {% endif %} -->
+
+                            
+                            <!-- <button class="btn-favorite" onclick="toggleFavorite({{ movie.id }})">
+                                <i class="far fa-heart"></i>
+                                Favorite
+                            </button>
+                            
+                            <button class="btn-share" onclick="showShareModal()">
+                                <i class="fas fa-share-alt"></i>
+                                Share
+                            </button> -->
+<!-- 
+                            {% if movie.video_sources %}
+                            <a class="btn-download" href="{% url 'movies:download_movie' movie.id %}" target="_blank" rel="noopener">
+                                <i class="fas fa-download"></i>
+                                Click here to Download
+                            </a>
+                            {% endif %} -->
+
+                            <!-- {% if movie.video_sources %} -->
+
+                            <!-- {% endif %} -->
+
+                            <div class="download-info-text">
+                                <small><i class="fas fa-info-circle"></i> Download link is resolved fresh each time - it may take a moment to load</small>
+                            </div>
+                        </div>
+
+                        <!-- <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="btn-watch-full-cta">
+                            <i class="fas fa-download"></i>
+                            Click Here To Watch Full Video
+                        </a> -->
+
+                        {% if movie.video_sources %}
+                        <div class="ad-native-slot">
+                            <script async="async" data-cfasync="false" src="https://pl31085306.profitableratecpmnetwork.com/8bfcba54dca0af5ac3c26568d5732cf3/invoke.js"></script>
+                            <div id="container-8bfcba54dca0af5ac3c26568d5732cf3"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Related Movies Section -->
     {% if related_movies %}

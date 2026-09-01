@@ -17,7 +17,19 @@
        since 2009, so it was pure page weight with zero SEO benefit. #} -->
     <title>{% block title %}After Dark - Premium Adult Entertainment{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}After Dark - HD adult videos updated daily. Stream and download for free, no sign-up required.{% endblock %}">
-    
+
+    <!-- Open Graph tags - these are what a Telegram (or any) plain-link post
+         unfurls into a preview card from, so every page needs a real title/
+         image rather than leaving it to guess. Separate blocks from
+         title/meta_description (a block name can't be reused within one
+         template) - the movie detail page is the only one that overrides
+         these, since it's the only page type that gets link-posted. -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:title" content="{% block og_title %}After Dark - Premium Adult Entertainment{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}After Dark - HD adult videos updated daily. Stream and download for free, no sign-up required.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/no-bg-logo.png' %}{% endblock %}">
+
     <!-- Favicon -->
     <link rel="icon" type="image/jpeg" href="{% static 'img/logo.jpg' %}">
 
@@ -55,7 +67,7 @@
             --border-radius-small: 12px;
             --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             --transition-bounce: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            --header-height: 70px;
+            --header-height: 82px;
         }
 
         * {
@@ -137,7 +149,7 @@
         }
 
         .logo img {
-            height: clamp(48px, 8vw, 60px);
+            height: clamp(52px, 9vw, 70px);
             width: auto;
             display: block;
         }
@@ -794,11 +806,11 @@
         /* Mobile landscape and smaller */
         @media (max-width: 767px) {
             :root {
-                --header-height: 60px;
+                --header-height: 70px;
             }
 
             .header {
-                height: 60px;
+                height: 70px;
             }
 
             .nav-container {
@@ -1127,13 +1139,6 @@
         </nav>
     </header>
 
-    <!-- Telegram VIP promo banner (top) - chigostv shows this both right under
-         the nav and again near the footer, so we mirror that here. -->
-    <div class="vip-promo-banner vip-promo-banner--top">
-        <p>Join Our VIP for FULL videos in HD &amp; 4K quality 🔥</p>
-        <a href="https://t.me/+Ct0NUYpNj1QxOTRk" target="_blank" rel="noopener" class="vip-promo-btn">Join Now</a>
-    </div>
-
     <!-- Adsterra Banner (728x90) -->
     <div class="ad-banner-slot">
         <script>
@@ -1146,6 +1151,16 @@
           };
         </script>
         <script src="https://www.highrevenueformat.com/496b92fdcf44274220d189c43553327e/invoke.js"></script>
+    </div>
+
+
+    <br>
+    <br>
+    <!-- Telegram VIP promo banner (top) - chigostv shows this both right under
+         the nav and again near the footer, so we mirror that here. -->
+    <div class="vip-promo-banner vip-promo-banner--top">
+        <p>Join Our VIP for FULL videos in HD &amp; 4K quality 🔥</p>
+        <a href="https://t.me/+Ct0NUYpNj1QxOTRk" target="_blank" rel="noopener" class="vip-promo-btn">Join Now</a>
     </div>
 
     <!-- Main Content -->
