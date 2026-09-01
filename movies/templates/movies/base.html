@@ -137,7 +137,7 @@
         }
 
         .logo img {
-            height: 44px;
+            height: clamp(48px, 8vw, 60px);
             width: auto;
             display: block;
         }
@@ -478,6 +478,13 @@
             .vip-promo-banner {
                 flex-direction: column;
             }
+        }
+
+        /* Small nudge down so the fake-chat social-bar ad (which renders as a
+           fixed overlay right under the nav for the first few seconds) doesn't
+           sit flush on top of this banner. */
+        .vip-promo-banner--top {
+            margin-top: clamp(20px, 4vh, 36px);
         }
 
         /* ===== AD SLOTS ===== */
@@ -1119,9 +1126,9 @@
 
     <!-- Telegram VIP promo banner (top) - chigostv shows this both right under
          the nav and again near the footer, so we mirror that here. -->
-    <div class="vip-promo-banner">
+    <div class="vip-promo-banner vip-promo-banner--top">
         <p>Join Our VIP for FULL videos in HD &amp; 4K quality 🔥</p>
-        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">GET ACCESS</a>
+        <a href="https://t.me/+Ct0NUYpNj1QxOTRk" target="_blank" rel="noopener" class="vip-promo-btn">Join Now</a>
     </div>
 
     <!-- Adsterra Banner (728x90) -->
@@ -1150,7 +1157,7 @@
          it got. Nothing ad-related ever renders down here. -->
     <div class="vip-promo-banner">
         <p>Join Our VIP for FULL videos in HD &amp; 4K quality 🔥</p>
-        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">GET ACCESS</a>
+        <a href="https://t.me/+Ct0NUYpNj1QxOTRk" target="_blank" rel="noopener" class="vip-promo-btn">Join Now</a>
     </div>
 
     <!-- Footer -->
