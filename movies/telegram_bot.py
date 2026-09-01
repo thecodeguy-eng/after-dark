@@ -9,6 +9,7 @@ video posts never carry a link:
             channel, so it plays inline in Telegram without leaving the app.
             No link is included in the caption.
 """
+import json
 import os
 import tempfile
 
@@ -53,13 +54,16 @@ def post_link(movie):
 
     Telegram unfurls a plain URL into its own preview card using the page's
     OpenGraph tags, so this naturally shows the movie's thumbnail/title
-    without us compositing or uploading an image ourselves.
+    without us compositing or uploading an image ourselves. prefer_large_media
+    asks Telegram for the big top-of-message image layout instead of the
+    small side thumbnail it defaults to.
     """
     _require_config()
 
     return _call('sendMessage', data={
         'chat_id': settings.TELEGRAM_CHANNEL_ID,
         'text': _movie_url(movie),
+        'link_preview_options': json.dumps({'prefer_large_media': True}),
     })
 
 
