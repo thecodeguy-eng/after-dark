@@ -73,7 +73,10 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
-            background: var(--primary-black);
+            background:
+                radial-gradient(1200px 600px at 20% -10%, rgba(220, 38, 38, 0.16), transparent 55%),
+                radial-gradient(900px 500px at 85% 10%, rgba(255, 215, 0, 0.08), transparent 55%),
+                var(--primary-black);
             color: var(--white);
             line-height: 1.6;
             overflow-x: hidden;
@@ -161,6 +164,9 @@
         }
 
         .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             color: var(--white);
             text-decoration: none;
             font-weight: 500;
@@ -169,6 +175,11 @@
             position: relative;
             padding: 10px 0;
             white-space: nowrap;
+        }
+
+        .nav-link i {
+            color: var(--primary-red);
+            font-size: 0.9em;
         }
 
         .nav-link:hover,
@@ -1084,11 +1095,11 @@
             </div>
 
             <ul class="nav-menu" id="nav-menu">
-                <li><a href="{% url 'movies:home' %}" class="nav-link">Home</a></li>
-                <li><a href="{% url 'movies:all_categories' %}" class="nav-link">Categories</a></li>
-                <li><a href="{% url 'movies:all_series' %}" class="nav-link">Series</a></li>
-                <li><a href="#" class="nav-link">Latest</a></li>
-                <li><a href="#" class="nav-link">Popular</a></li>
+                <li><a href="{% url 'movies:home' %}" class="nav-link"><i class="fas fa-house"></i> Home</a></li>
+                <li><a href="{% url 'movies:all_categories' %}" class="nav-link"><i class="fas fa-folder"></i> Categories</a></li>
+                <li><a href="{% url 'movies:all_series' %}" class="nav-link"><i class="fas fa-list-ol"></i> Series</a></li>
+                <li><a href="#" class="nav-link"><i class="fas fa-clock"></i> Latest</a></li>
+                <li><a href="#" class="nav-link"><i class="fas fa-fire"></i> Popular</a></li>
                 <li><a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="nav-telegram-btn">
                     <i class="fab fa-telegram-plane"></i> Join Telegram
                 </a></li>
@@ -1125,8 +1136,8 @@
          and was covering/clipping this banner no matter how much top margin
          it got. Nothing ad-related ever renders down here. -->
     <div class="vip-promo-banner">
-        <p>🔥 VIP members get every video in full HD &amp; 4K — join free on Telegram</p>
-        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">Unlock Access</a>
+        <p>Join Our VIP for FULL videos in HD &amp; 4K quality 🔥</p>
+        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">GET ACCESS</a>
     </div>
 
     <!-- Footer -->

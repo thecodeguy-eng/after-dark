@@ -11,21 +11,8 @@
     <div class="hero-background"></div>
     <div class="container">
         <div class="hero-content">
-            <div class="hero-icon">
-                <i class="fas fa-th-large"></i>
-            </div>
             <h1 class="hero-title">All Categories</h1>
-            <p class="hero-subtitle">Explore our extensive collection organized by genres and themes</p>
-            <div class="hero-stats">
-                <span class="stat-item">
-                    <i class="fas fa-layer-group"></i>
-                    {{ categories|length }} Categories
-                </span>
-                <span class="stat-item">
-                    <i class="fas fa-film"></i>
-                    Thousands of Movies
-                </span>
-            </div>
+            <p class="hero-subtitle">Browse {{ categories|length }} categories</p>
         </div>
     </div>
 </section>
@@ -33,97 +20,17 @@
 <!-- Categories Section -->
 <section class="section">
     <div class="container">
-        <!-- Search and Filter -->
-        <div class="categories-controls">
-            <div class="search-categories">
-                <input type="text" id="category-search" placeholder="Search categories..." class="category-search-input">
-                <i class="fas fa-search search-icon"></i>
-            </div>
-            
-            <div class="filter-controls">
-                <select id="sort-categories" class="sort-select">
-                    <option value="popular">Most Popular</option>
-                    <option value="alphabetical">A-Z</option>
-                    <option value="newest">Newest First</option>
-                    <option value="movie-count">Most Movies</option>
-                </select>
-                
-                <div class="view-toggle-container">
-                    <button class="view-toggle active" data-view="grid" title="Grid View">
-                        <i class="fas fa-th"></i>
-                    </button>
-                    <button class="view-toggle" data-view="list" title="List View">
-                        <i class="fas fa-list"></i>
-                    </button>
-                </div>
-            </div>
+        <div class="search-categories">
+            <input type="text" id="category-search" placeholder="Search categories..." class="category-search-input">
+            <i class="fas fa-search search-icon"></i>
         </div>
 
         {% if categories %}
-            <!-- Categories Grid -->
-            <div class="categories-container">
-                <div class="categories-grid" id="categories-grid">
-                    {% for category in categories %}
-                        <div class="category-card" 
-                             data-name="{{ category.name|lower }}" 
-                             data-count="{{ category.movie_count }}"
-                             data-date="{{ category.created_at|date:'Y-m-d' }}">
-                            <a href="{% url 'movies:category' category.slug %}" class="category-link">
-                                <div class="category-icon-container">
-                                    <div class="category-icon">
-                                        {% comment %} Dynamic icon based on category name {% endcomment %}
-                                        {% if 'action' in category.name|lower %}
-                                            <i class="fas fa-fist-raised"></i>
-                                        {% elif 'romance' in category.name|lower %}
-                                            <i class="fas fa-heart"></i>
-                                        {% elif 'comedy' in category.name|lower %}
-                                            <i class="fas fa-laugh"></i>
-                                        {% elif 'drama' in category.name|lower %}
-                                            <i class="fas fa-masks-theater"></i>
-                                        {% elif 'horror' in category.name|lower %}
-                                            <i class="fas fa-ghost"></i>
-                                        {% elif 'adventure' in category.name|lower %}
-                                            <i class="fas fa-map-marked-alt"></i>
-                                        {% elif 'fantasy' in category.name|lower %}
-                                            <i class="fas fa-magic"></i>
-                                        {% elif 'sci-fi' in category.name|lower or 'science' in category.name|lower %}
-                                            <i class="fas fa-rocket"></i>
-                                        {% else %}
-                                            <i class="fas fa-film"></i>
-                                        {% endif %}
-                                    </div>
-                                    <div class="category-overlay">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </div>
-                                </div>
-                                
-                                <div class="category-info">
-                                    <h3 class="category-name">{{ category.name }}</h3>
-                                    <div class="category-stats">
-                                        <span class="movie-count">
-                                            <i class="fas fa-play-circle"></i>
-                                            {{ category.movie_count }} movie{{ category.movie_count|pluralize }}
-                                        </span>
-                                        <span class="category-date">
-                                            <i class="fas fa-calendar"></i>
-                                            {{ category.created_at|timesince }} ago
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <div class="category-badge">
-                                    {% if category.movie_count > 100 %}
-                                        <span class="badge popular">Popular</span>
-                                    {% elif category.movie_count > 50 %}
-                                        <span class="badge active">Active</span>
-                                    {% else %}
-                                        <span class="badge new">New</span>
-                                    {% endif %}
-                                </div>
-                            </a>
-                        </div>
-                    {% endfor %}
-                </div>
+            <!-- Flat tag-pill grid, same style used across the site -->
+            <div class="category-grid" id="categories-grid">
+                {% for category in categories %}
+                <a href="{% url 'movies:category' category.slug %}" class="category-card" data-name="{{ category.name|lower }}">{{ category.name }}</a>
+                {% endfor %}
             </div>
 
             <!-- No Results Message -->
@@ -152,36 +59,6 @@
                 </a>
             </div>
         {% endif %}
-
-        <!-- Quick Access Categories -->
-        <div class="quick-access-section">
-            <h3 class="quick-access-title">
-                <i class="fas fa-bolt"></i>
-                Quick Access
-            </h3>
-            <div class="quick-access-grid">
-                <a href="{% url 'movies:home' %}" class="quick-access-card featured">
-                    <i class="fas fa-star"></i>
-                    <span>Featured</span>
-                    <small>Editor's choice</small>
-                </a>
-                <a href="{% url 'movies:home' %}" class="quick-access-card latest">
-                    <i class="fas fa-clock"></i>
-                    <span>Latest</span>
-                    <small>Recently added</small>
-                </a>
-                <a href="{% url 'movies:home' %}" class="quick-access-card popular">
-                    <i class="fas fa-fire"></i>
-                    <span>Most Popular</span>
-                    <small>Trending now</small>
-                </a>
-                <a href="{% url 'movies:all_series' %}" class="quick-access-card series">
-                    <i class="fas fa-list-ol"></i>
-                    <span>Series</span>
-                    <small>Episode collections</small>
-                </a>
-            </div>
-        </div>
     </div>
 </section>
 
@@ -211,13 +88,6 @@
     z-index: 2;
 }
 
-.hero-icon {
-    font-size: clamp(2.5rem, 6vw, 4rem);
-    color: var(--primary-gold);
-    margin-bottom: clamp(15px, 3vh, 20px);
-    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-}
-
 .hero-title {
     font-size: clamp(2.2rem, 6vw, 3.5rem);
     font-weight: 800;
@@ -238,26 +108,10 @@
     margin-right: auto;
 }
 
-.hero-stats {
-    display: flex;
-    justify-content: center;
-    gap: clamp(20px, 4vw, 30px);
-    flex-wrap: wrap;
-}
-
-.categories-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: clamp(30px, 6vh, 50px);
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
 .search-categories {
     position: relative;
-    flex-grow: 1;
     max-width: 400px;
+    margin: 0 auto clamp(30px, 6vh, 50px);
 }
 
 .category-search-input {
@@ -291,222 +145,34 @@
     pointer-events: none;
 }
 
-.filter-controls {
+/* Flat tag-pill grid - matches the category pills used elsewhere on the site */
+.category-grid {
     display: flex;
-    align-items: center;
-    gap: 15px;
     flex-wrap: wrap;
-}
-
-.view-toggle-container {
-    display: flex;
-    gap: 5px;
-}
-
-.categories-grid {
-    display: grid;
-    gap: clamp(20px, 4vw, 30px);
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    justify-content: center;
+    gap: clamp(8px, 1.5vw, 12px);
     margin-bottom: clamp(40px, 8vh, 60px);
 }
 
-.categories-grid.list-view {
-    grid-template-columns: 1fr;
-    gap: 15px;
-}
-
-.categories-grid.list-view .category-card {
-    max-height: 120px;
-}
-
-.categories-grid.list-view .category-link {
-    flex-direction: row;
-    align-items: center;
-    text-align: left;
-}
-
-.categories-grid.list-view .category-icon-container {
-    width: 80px;
-    height: 80px;
-    flex-shrink: 0;
-}
-
-.categories-grid.list-view .category-info {
-    flex: 1;
-    padding: 0 20px;
-}
-
-.categories-grid.list-view .category-badge {
-    align-self: flex-start;
-}
-
-/* Responsive grid layouts */
-@media (min-width: 1400px) {
-    .categories-grid:not(.list-view) { grid-template-columns: repeat(5, 1fr); }
-}
-
-@media (min-width: 1200px) and (max-width: 1399px) {
-    .categories-grid:not(.list-view) { grid-template-columns: repeat(4, 1fr); }
-}
-
-@media (min-width: 992px) and (max-width: 1199px) {
-    .categories-grid:not(.list-view) { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-    .categories-grid:not(.list-view) { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 767px) {
-    .categories-grid:not(.list-view) { grid-template-columns: 1fr; }
-}
-
 .category-card {
-    background: var(--light-gray);
-    border-radius: var(--border-radius);
-    overflow: hidden;
+    background: var(--medium-gray);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: clamp(10px, 1.8vh, 14px) clamp(16px, 3vw, 26px);
+    text-decoration: none;
+    color: var(--white);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: clamp(11px, 1.6vw, 14px);
+    white-space: nowrap;
     transition: var(--transition-smooth);
-    border: 1px solid rgba(220, 38, 38, 0.1);
-    position: relative;
 }
 
 .category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(220, 38, 38, 0.25);
-    border-color: var(--primary-gold);
-}
-
-.category-link {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    text-decoration: none;
-    color: inherit;
-    padding: clamp(20px, 4vw, 30px);
-    text-align: center;
-    position: relative;
-}
-
-.category-icon-container {
-    position: relative;
-    width: clamp(80px, 15vw, 120px);
-    height: clamp(80px, 15vw, 120px);
-    margin: 0 auto clamp(15px, 3vw, 20px);
     background: var(--gradient-red);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition-smooth);
-}
-
-.category-card:hover .category-icon-container {
-    background: var(--gradient-gold);
-    transform: scale(1.1);
-}
-
-.category-icon {
-    font-size: clamp(2rem, 5vw, 3rem);
-    color: var(--white);
-    transition: var(--transition-smooth);
-}
-
-.category-card:hover .category-icon {
-    color: var(--primary-black);
-}
-
-.category-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: var(--transition-smooth);
-    border-radius: 50%;
-}
-
-.category-card:hover .category-overlay {
-    opacity: 1;
-}
-
-.category-overlay i {
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    color: var(--white);
-}
-
-.category-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(8px, 2vw, 12px);
-}
-
-.category-name {
-    font-size: clamp(1.1rem, 3vw, 1.4rem);
-    font-weight: 700;
-    color: var(--white);
-    transition: var(--transition-smooth);
-    line-height: 1.2;
-}
-
-.category-card:hover .category-name {
-    color: var(--primary-gold);
-}
-
-.category-stats {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(5px, 1vw, 8px);
-    font-size: clamp(12px, 2vw, 14px);
-    color: var(--text-gray);
-}
-
-.category-stats span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.category-stats i {
-    color: var(--primary-gold);
-    font-size: 0.9em;
-}
-
-.category-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-}
-
-.badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: clamp(10px, 2vw, 12px);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.badge.popular {
-    background: var(--gradient-gold);
-    color: var(--primary-black);
-}
-
-.badge.active {
-    background: var(--gradient-red);
-    color: var(--white);
-}
-
-.badge.new {
-    background: rgba(34, 197, 94, 0.2);
-    color: #22c55e;
-    border: 1px solid #22c55e;
+    border-color: var(--primary-red);
+    transform: translateY(-2px);
 }
 
 /* No results and empty states */
@@ -565,99 +231,10 @@
     transform: translateY(-2px);
 }
 
-/* Quick Access Section */
-.quick-access-section {
-    margin-top: clamp(50px, 10vh, 80px);
-    padding-top: clamp(40px, 8vh, 60px);
-    border-top: 1px solid rgba(220, 38, 38, 0.2);
-}
-
-.quick-access-title {
-    font-size: clamp(1.4rem, 4vw, 1.8rem);
-    font-weight: 700;
-    color: var(--primary-gold);
-    margin-bottom: clamp(25px, 5vh, 35px);
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
-
-.quick-access-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: clamp(15px, 3vw, 20px);
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.quick-access-card {
-    background: var(--light-gray);
-    border: 1px solid rgba(220, 38, 38, 0.1);
-    border-radius: var(--border-radius);
-    padding: clamp(20px, 4vw, 25px);
-    text-decoration: none;
-    color: var(--white);
-    text-align: center;
-    transition: var(--transition-smooth);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.quick-access-card:hover {
-    border-color: var(--primary-gold);
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2);
-}
-
-.quick-access-card i {
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    color: var(--primary-gold);
-    margin-bottom: 8px;
-}
-
-.quick-access-card span {
-    font-weight: 600;
-    font-size: clamp(14px, 3vw, 16px);
-}
-
-.quick-access-card small {
-    color: var(--text-gray);
-    font-size: clamp(12px, 2vw, 14px);
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .categories-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .filter-controls {
-        justify-content: space-between;
-    }
-    
     .search-categories {
         max-width: none;
-        margin-bottom: 15px;
-    }
-    
-    .quick-access-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-stats {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .quick-access-grid {
-        grid-template-columns: 1fr;
     }
 }
 </style>
