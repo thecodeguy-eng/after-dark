@@ -159,6 +159,9 @@ crontab -e
 # Scrape a fresh batch of xvideos categories nightly (pages 0-2 across all categories)
 0 3 * * * cd /var/www/after-dark && venv/bin/python manage.py scrape_xvideos 0 2 >> /var/log/afterdark-scrape.log 2>&1
 
+# Naija is the homepage's lead section, so it gets its own nightly search-based scrape
+30 3 * * * cd /var/www/after-dark && venv/bin/python manage.py scrape_xvideos --search naija --limit 24 >> /var/log/afterdark-scrape.log 2>&1
+
 # 3 link posts + 2 video posts/day, spread out
 0 9 * * *  cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
 0 13 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type video >> /var/log/afterdark-telegram.log 2>&1

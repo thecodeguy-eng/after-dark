@@ -85,10 +85,11 @@ class HomeView(ListView):
 
         # Populated by `scrape_xvideos --search naija` (see that command for why
         # a search-based scrape is used instead of a category - xvideos has no
-        # Nigeria/Naija category to browse).
+        # Nigeria/Naija category to browse). This is the homepage's lead
+        # section, so it gets a bigger slice than the other spotlight rows.
         context['naija_movies'] = Movie.objects.filter(
             status='publish', categories__name__icontains='naija'
-        ).distinct().order_by('-date').select_related().prefetch_related('categories', 'tags')[:12]
+        ).distinct().order_by('-date').select_related().prefetch_related('categories', 'tags')[:24]
 
         context['featured_movies'] = Movie.objects.filter(
             status='publish', is_sticky=True

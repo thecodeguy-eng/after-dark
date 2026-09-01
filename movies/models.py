@@ -63,7 +63,10 @@ class Movie(models.Model):
     
     # SEO fields
     meta_description = models.TextField(blank=True)
-    canonical_url = models.URLField(blank=True)
+    # xvideos embeds the full (sometimes very long) title into its URL path,
+    # so the default URLField max_length=200 truncation-rejects some scraped
+    # videos outright - matches title/slug already being sized generously.
+    canonical_url = models.URLField(blank=True, max_length=1000)
     
     # Internal fields
     scraped = models.BooleanField(default=False)

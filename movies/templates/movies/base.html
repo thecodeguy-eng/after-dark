@@ -740,6 +740,12 @@
             font-size: clamp(12px, 2vw, 14px);
         }
 
+        .footer-disclaimer {
+            max-width: 700px;
+            margin: 0 auto clamp(10px, 2vh, 14px);
+            line-height: 1.6;
+        }
+
         /* ===== RESPONSIVE BREAKPOINTS WITH MOBILE MENU ===== */
 
         /* Large desktop */
@@ -1111,6 +1117,13 @@
         </nav>
     </header>
 
+    <!-- Telegram VIP promo banner (top) - chigostv shows this both right under
+         the nav and again near the footer, so we mirror that here. -->
+    <div class="vip-promo-banner">
+        <p>Join Our VIP for FULL videos in HD &amp; 4K quality 🔥</p>
+        <a href="{{ TELEGRAM_CHANNEL_INVITE_LINK }}" target="_blank" rel="noopener" class="vip-promo-btn">GET ACCESS</a>
+    </div>
+
     <!-- Adsterra Banner (728x90) -->
     <div class="ad-banner-slot">
         <script>
@@ -1175,7 +1188,8 @@
             {% endblock %}
 
             <div class="footer-bottom">
-                <p>&copy; After Dark. All rights reserved.</p>
+                <p class="footer-disclaimer">The After Dark team is always updating and adding more videos every day. It's all here and 100% free &mdash; stream or download whenever you want.</p>
+                <p>&copy; All rights reserved. {% now "Y" %}, After Dark.</p>
             </div>
         </div>
     </footer>
