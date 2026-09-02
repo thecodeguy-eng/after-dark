@@ -24,7 +24,7 @@ API_BASE = 'https://api.telegram.org/bot{token}/{method}'
 
 # Separate "VIP" channel plugged in link-post captions - not the same as
 # TELEGRAM_CHANNEL_ID (the main channel these posts go to).
-VIP_INVITE_LINK = 'https://t.me/+Ct0NUYpNj1QxOTRk'
+VIP_INVITE_LINK = 'https://t.me/+S-8SqoctOf4xNzdk'
 
 # Classic Telegram Bot API upload limit. Files above this are rejected by
 # Telegram, so we check before downloading anything.
@@ -68,7 +68,7 @@ def post_link(movie):
     caption = (
         f"🇳🇬 {title}\n\n"
         f"👇 WATCH FULL VIDEO NOW 👇\n{url}\n\n"
-        f"🔥 Want it uncut in HD & 4K? Join our VIP channel:\n{VIP_INVITE_LINK}\n\n"
+        f"🔥 Looking for more leaked videos? Join our VIP to download and watch premium contents without ads👇👇\n{VIP_INVITE_LINK}\n\n"
         f"React for more 😍❤️"
     )[:1024]
 
