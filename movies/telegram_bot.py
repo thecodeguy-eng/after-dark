@@ -67,7 +67,7 @@ def post_link(movie):
     title = movie.title[:150]
     caption = (
         f"🇳🇬 {title}\n\n"
-        f"👇 WATCH NOW 👇\n{url}\n\n"
+        f"👇 WATCH FULL VIDEO NOW 👇\n{url}\n\n"
         f"🔥 Want it uncut in HD & 4K? Join our VIP channel:\n{VIP_INVITE_LINK}\n\n"
         f"React for more 😍❤️"
     )[:1024]
