@@ -58,6 +58,13 @@ def parse_video_block(block):
     if not eid or not numeric_id or not title_link:
         return None
 
+    # The duration span is nested inside the title link (e.g. "Some Title<span>5 min</span>"),
+    # so pull it out before reading the title text, then strip it from the title itself.
+    duration_el = title_link.select_one('span.duration')
+    duration = duration_el.get_text(strip=True) if duration_el else ''
+    if duration_el:
+        duration_el.extract()
+
     title = (title_link.get('title') or title_link.get_text()).strip()
     title = re.sub(r'\s+', ' ', title)
     if not title:
@@ -78,6 +85,7 @@ def parse_video_block(block):
         'canonical_url': canonical_url,
         'thumbnail': thumbnail,
         'preview': preview,
+        'duration': duration,
         'embed_url': f'{BASE_URL}/embedframe/{eid}',
     }
 
@@ -293,6 +301,7 @@ class Command(BaseCommand):
                 'post_type': 'post',
                 'image_url': data['thumbnail'],
                 'canonical_url': data['canonical_url'],
+                'duration': data['duration'],
                 'video_sources': [{
                     'url': data['embed_url'],
                     'type': 'iframe',

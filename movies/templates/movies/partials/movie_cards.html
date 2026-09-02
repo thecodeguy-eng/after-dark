@@ -16,6 +16,9 @@
                 <i class="fas fa-bolt"></i>
                 {% if movie.video_sources %}HD{% else %}Preview{% endif %}
             </div>
+            {% if movie.duration %}
+            <div class="video-length-badge">{{ movie.duration }}</div>
+            {% endif %}
         </a>
     </div>
     <div class="movie-info">

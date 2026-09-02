@@ -43,6 +43,7 @@ class Movie(models.Model):
     # Media
     featured_media_id = models.IntegerField(null=True, blank=True)
     image_url = models.URLField(blank=True)
+    duration = models.CharField(max_length=20, blank=True)  # e.g. "5 min", as scraped
     
     # Video sources - JSON field to store multiple sources
     video_sources = models.JSONField(default=list, blank=True)

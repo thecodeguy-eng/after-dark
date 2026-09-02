@@ -167,6 +167,9 @@
                             </span>
                             {% endif %}
                         </div>
+                        {% if movie.duration %}
+                        <div class="video-length-badge">{{ movie.duration }}</div>
+                        {% endif %}
                     </div>
                     <div class="movie-info">
                         <h3 class="movie-title">

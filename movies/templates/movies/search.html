@@ -101,6 +101,9 @@
                                     <i class="fas fa-clock"></i>
                                     {{ movie.date|timesince }}
                                 </div>
+                                {% if movie.duration %}
+                                <div class="video-length-badge">{{ movie.duration }}</div>
+                                {% endif %}
                             </div>
                             
                             <div class="movie-info">
