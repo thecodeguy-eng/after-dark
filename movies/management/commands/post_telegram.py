@@ -10,7 +10,8 @@ MAX_ATTEMPTS = 5
 class Command(BaseCommand):
     help = (
         'Post an unposted movie to the After Dark Telegram channel. '
-        'Run this from cron - e.g. 3x/day with --type link and 2x/day with --type video.'
+        'Run this from cron - 25x/day with --type link and 15x/day with --type video, '
+        'spread across the day (see DEPLOYMENT.md for the exact schedule).'
     )
 
     def add_arguments(self, parser):

@@ -2,14 +2,16 @@
 
 Two post types, kept strictly separate - link posts never carry a video, and
 video posts never carry a link:
-- 'link'  - the plain movie-page URL as a text message. Telegram unfurls this
-            into a preview card itself, using the page's own OpenGraph tags
-            (see base.html/detail.html), so no image is attached directly.
+- 'link'  - the movie's thumbnail sent as an actual photo (sendPhoto), with
+            the write-up and link in the caption. We tried leaving this to
+            Telegram's own link-unfurl (plain sendMessage + OpenGraph tags),
+            but Telegram doesn't reliably render that large/full-size - a
+            directly-attached photo always displays at full size, so that's
+            what guarantees the image actually shows properly.
 - 'video' - downloads the resolved direct mp4 and uploads it natively to the
             channel, so it plays inline in Telegram without leaving the app.
             No link is included in the caption.
 """
-import json
 import os
 import tempfile
 
@@ -19,6 +21,10 @@ from django.conf import settings
 from .utils import find_xvideos_embed_url, resolve_xvideos_direct_urls
 
 API_BASE = 'https://api.telegram.org/bot{token}/{method}'
+
+# Separate "VIP" channel plugged in link-post captions - not the same as
+# TELEGRAM_CHANNEL_ID (the main channel these posts go to).
+VIP_INVITE_LINK = 'https://t.me/+Ct0NUYpNj1QxOTRk'
 
 # Classic Telegram Bot API upload limit. Files above this are rejected by
 # Telegram, so we check before downloading anything.
@@ -50,20 +56,32 @@ def _movie_url(movie):
 
 
 def post_link(movie):
-    """Send a link-only post for a movie - just the URL, no attached photo.
+    """Send a photo + write-up + link post for a movie (no video attached).
 
-    Telegram unfurls a plain URL into its own preview card using the page's
-    OpenGraph tags, so this naturally shows the movie's thumbnail/title
-    without us compositing or uploading an image ourselves. prefer_large_media
-    asks Telegram for the big top-of-message image layout instead of the
-    small side thumbnail it defaults to.
+    The thumbnail is sent as an actual photo rather than left to Telegram's
+    link-unfurl, since that doesn't reliably render large/full-size.
     """
     _require_config()
 
+    url = _movie_url(movie)
+    title = movie.title[:150]
+    caption = (
+        f"🇳🇬 {title}\n\n"
+        f"👇 WATCH NOW 👇\n{url}\n\n"
+        f"🔥 Want it uncut in HD & 4K? Join our VIP channel:\n{VIP_INVITE_LINK}\n\n"
+        f"React for more 😍❤️"
+    )[:1024]
+
+    if movie.image_url:
+        return _call('sendPhoto', data={
+            'chat_id': settings.TELEGRAM_CHANNEL_ID,
+            'photo': movie.image_url,
+            'caption': caption,
+        })
+
     return _call('sendMessage', data={
         'chat_id': settings.TELEGRAM_CHANNEL_ID,
-        'text': _movie_url(movie),
-        'link_preview_options': json.dumps({'prefer_large_media': True}),
+        'text': caption,
     })
 
 
