@@ -14,6 +14,7 @@ video posts never carry a link:
 """
 import os
 import tempfile
+from html import escape
 
 import requests
 from django.conf import settings
@@ -59,29 +60,37 @@ def post_link(movie):
     """Send a photo + write-up + link post for a movie (no video attached).
 
     The thumbnail is sent as an actual photo rather than left to Telegram's
-    link-unfurl, since that doesn't reliably render large/full-size.
+    link-unfurl, since that doesn't reliably render large/full-size. Caption
+    uses Telegram's HTML formatting (bold + blockquote) - the movie title is
+    untrusted scraped text, so it's HTML-escaped before going anywhere near
+    the markup.
     """
     _require_config()
 
     url = _movie_url(movie)
-    title = movie.title[:150]
+    # Truncated up front (not sliced after assembly) so a long title can never
+    # cut the caption off mid-HTML-tag and break the whole message.
+    title = escape(movie.title[:150])
     caption = (
         f"🇳🇬 {title}\n\n"
-        f"👇 WATCH FULL VIDEO NOW 👇\n{url}\n\n"
-        f"🔥 Looking for more leaked videos? Join our VIP to download and watch premium contents without ads👇👇\n{VIP_INVITE_LINK}\n\n"
+        f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote>{url}</blockquote>\n\n"
+        f"🔥 Looking for more leaked videos? Join our VIP to download and watch premium contents without ads👇👇\n"
+        f"{VIP_INVITE_LINK}\n{VIP_INVITE_LINK}\n\n"
         f"React for more 😍❤️"
-    )[:1024]
+    )
 
     if movie.image_url:
         return _call('sendPhoto', data={
             'chat_id': settings.TELEGRAM_CHANNEL_ID,
             'photo': movie.image_url,
             'caption': caption,
+            'parse_mode': 'HTML',
         })
 
     return _call('sendMessage', data={
         'chat_id': settings.TELEGRAM_CHANNEL_ID,
         'text': caption,
+        'parse_mode': 'HTML',
     })
 
 
