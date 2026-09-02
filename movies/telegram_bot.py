@@ -73,10 +73,11 @@ def post_link(movie):
     title = escape(movie.title[:150])
     caption = (
         f"🇳🇬 <b>{title}</b>\n\n"
-        f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote><i>{url}</i></blockquote>\n\n"
-        f"🔥 <b>Looking for more leaked videos? Join our VIP to download and watch premium contents without ads</b>👇👇\n"
+        f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote>{url}</blockquote>\n\n"
+        f"🔥 <b>Looking for more leaked videos?</b> Join our VIP to download and watch premium contents without ads👇👇\n\n"
         f"{VIP_INVITE_LINK}\n{VIP_INVITE_LINK}\n\n"
-        f"<b>React for more</b> 😍❤️"
+        f"<i>OR send a dm to 👉 @Xoxo_Tia for Crypto/ Bank Deposit/ Paypal</i>\n\n"
+        f"React for more ❤️🔥"
     )
 
     if movie.image_url:
