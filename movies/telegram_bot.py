@@ -2,16 +2,14 @@
 
 Two post types, kept strictly separate - link posts never carry a video, and
 video posts never carry a link:
-- 'link'  - the movie's thumbnail sent as an actual photo (sendPhoto), with
-            the write-up and link in the caption. We tried leaving this to
-            Telegram's own link-unfurl (plain sendMessage + OpenGraph tags),
-            but Telegram doesn't reliably render that large/full-size - a
-            directly-attached photo always displays at full size, so that's
-            what guarantees the image actually shows properly.
+- 'link'  - the write-up + link as a plain text message. Telegram unfurls the
+            URL into its own preview card, using the page's OpenGraph tags
+            (see base.html/detail.html) - no photo is attached directly.
 - 'video' - downloads the resolved direct mp4 and uploads it natively to the
             channel, so it plays inline in Telegram without leaving the app.
             No link is included in the caption.
 """
+import json
 import os
 import tempfile
 from html import escape
@@ -57,13 +55,12 @@ def _movie_url(movie):
 
 
 def post_link(movie):
-    """Send a photo + write-up + link post for a movie (no video attached).
+    """Send a link-only post for a movie (no photo attached, no video).
 
-    The thumbnail is sent as an actual photo rather than left to Telegram's
-    link-unfurl, since that doesn't reliably render large/full-size. Caption
-    uses Telegram's HTML formatting (bold + blockquote) - the movie title is
-    untrusted scraped text, so it's HTML-escaped before going anywhere near
-    the markup.
+    Telegram unfurls the URL into its own preview card using the page's
+    OpenGraph tags. Text uses Telegram's HTML formatting (bold/italic/
+    blockquote) - the movie title is untrusted scraped text, so it's
+    HTML-escaped before going anywhere near the markup.
     """
     _require_config()
 
@@ -71,7 +68,7 @@ def post_link(movie):
     # Truncated up front (not sliced after assembly) so a long title can never
     # cut the caption off mid-HTML-tag and break the whole message.
     title = escape(movie.title[:150])
-    caption = (
+    text = (
         f"🇳🇬 <b>{title}</b>\n\n"
         f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote>{url}</blockquote>\n\n"
         f"🔥 <b>Looking for more leaked videos?</b> Join our VIP to download and watch premium contents without ads👇👇\n\n"
@@ -80,18 +77,13 @@ def post_link(movie):
         f"React for more ❤️🔥"
     )
 
-    if movie.image_url:
-        return _call('sendPhoto', data={
-            'chat_id': settings.TELEGRAM_CHANNEL_ID,
-            'photo': movie.image_url,
-            'caption': caption,
-            'parse_mode': 'HTML',
-        })
-
+    # The message also contains the VIP link (twice) - pin the preview to the
+    # movie URL explicitly so Telegram doesn't unfurl one of those instead.
     return _call('sendMessage', data={
         'chat_id': settings.TELEGRAM_CHANNEL_ID,
-        'text': caption,
+        'text': text,
         'parse_mode': 'HTML',
+        'link_preview_options': json.dumps({'url': url, 'prefer_large_media': True}),
     })
 
 
