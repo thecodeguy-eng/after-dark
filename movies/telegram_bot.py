@@ -72,11 +72,11 @@ def post_link(movie):
     # cut the caption off mid-HTML-tag and break the whole message.
     title = escape(movie.title[:150])
     caption = (
-        f"🇳🇬 {title}\n\n"
-        f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote>{url}</blockquote>\n\n"
-        f"🔥 Looking for more leaked videos? Join our VIP to download and watch premium contents without ads👇👇\n"
+        f"🇳🇬 <b>{title}</b>\n\n"
+        f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote><i>{url}</i></blockquote>\n\n"
+        f"🔥 <b>Looking for more leaked videos? Join our VIP to download and watch premium contents without ads</b>👇👇\n"
         f"{VIP_INVITE_LINK}\n{VIP_INVITE_LINK}\n\n"
-        f"React for more 😍❤️"
+        f"<b>React for more</b> 😍❤️"
     )
 
     if movie.image_url:
