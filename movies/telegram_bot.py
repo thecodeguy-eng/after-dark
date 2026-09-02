@@ -1,13 +1,19 @@
 """Posts scraped movies to the After Dark Telegram channel via the Bot API.
 
 Two post types, kept strictly separate - link posts never carry a video, and
-video posts never carry a link:
-- 'link'  - the write-up + link as a plain text message. Telegram unfurls the
-            URL into its own preview card, using the page's OpenGraph tags
-            (see base.html/detail.html) - no photo is attached directly.
+video posts never carry a site link:
+- 'link'  - the write-up + site link as a plain text message. Telegram
+            unfurls the URL into its own preview card, using the page's
+            OpenGraph tags (see base.html/detail.html) - no photo attached.
 - 'video' - downloads the resolved direct mp4 and uploads it natively to the
             channel, so it plays inline in Telegram without leaving the app.
-            No link is included in the caption.
+            Same write-up as link posts (title + VIP plug), minus the "watch
+            full video" site-link line, since that would just point back at
+            the content already attached to the same message.
+
+Both share the same VIP-channel/payment-DM plug (_vip_plug) - that's
+promotional, not a link back to the site, so it's not covered by the
+no-link-on-video rule.
 """
 import json
 import os
@@ -54,6 +60,16 @@ def _movie_url(movie):
     return f"{settings.SITE_URL.rstrip('/')}{movie.get_absolute_url()}"
 
 
+def _vip_plug():
+    """Shared VIP-channel/payment-DM write-up, reused by both post types."""
+    return (
+        f"🔥 <b>Looking for more leaked videos?</b> Join our VIP to download and watch premium contents without ads👇👇\n\n"
+        f"{VIP_INVITE_LINK}\n{VIP_INVITE_LINK}\n\n"
+        f"<i>OR send a dm to 👉 @Xoxo_Tia for Crypto/ Bank Deposit/ Paypal</i>\n\n"
+        f"React for more ❤️🔥"
+    )
+
+
 def post_link(movie):
     """Send a link-only post for a movie (no photo attached, no video).
 
@@ -71,10 +87,7 @@ def post_link(movie):
     text = (
         f"🇳🇬 <b>{title}</b>\n\n"
         f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote>{url}</blockquote>\n\n"
-        f"🔥 <b>Looking for more leaked videos?</b> Join our VIP to download and watch premium contents without ads👇👇\n\n"
-        f"{VIP_INVITE_LINK}\n{VIP_INVITE_LINK}\n\n"
-        f"<i>OR send a dm to 👉 @Xoxo_Tia for Crypto/ Bank Deposit/ Paypal</i>\n\n"
-        f"React for more ❤️🔥"
+        f"{_vip_plug()}"
     )
 
     # The message also contains the VIP link (twice) - pin the preview to the
@@ -112,7 +125,8 @@ def post_video(movie):
             f'Video is {content_length / 1024 / 1024:.1f}MB, over the {MAX_VIDEO_BYTES // 1024 // 1024}MB Bot API limit'
         )
 
-    caption = movie.title[:1024]
+    title = escape(movie.title[:150])
+    caption = f"🇳🇬 <b>{title}</b>\n\n{_vip_plug()}"
 
     with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as tmp:
         tmp_path = tmp.name
@@ -130,6 +144,7 @@ def post_video(movie):
             return _call('sendVideo', data={
                 'chat_id': settings.TELEGRAM_CHANNEL_ID,
                 'caption': caption,
+                'parse_mode': 'HTML',
                 'supports_streaming': True,
             }, files={'video': f})
     finally:
