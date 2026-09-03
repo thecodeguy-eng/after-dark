@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from django.views.decorators.csrf import csrf_exempt
@@ -7,7 +7,10 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView
 from .models import Movie, Category, Tag, Series, Episode
 from .utils import resolve_xvideos_direct_urls, find_xvideos_embed_url
+import io
 import json
+import requests
+from PIL import Image, ImageDraw
 from django.template.loader import render_to_string
 
 def load_more_movies(request):
@@ -289,6 +292,58 @@ def resolve_video_source(request, movie_id):
         return JsonResponse({'error': 'Could not find a direct video URL'}, status=502)
 
     return JsonResponse({'url': play_url})
+
+
+def movie_thumbnail_view(request, movie_id):
+    """Serve the movie's thumbnail with a red play-button baked on top.
+
+    Used as the detail page's og:image (see detail.html) so a plain-link
+    Telegram post - or any other link-preview consumer - shows a proper
+    "video card" look instead of the bare scraped thumbnail.
+    """
+    movie = get_object_or_404(Movie, id=movie_id)
+    if not movie.image_url:
+        return HttpResponse(status=404)
+
+    try:
+        response = requests.get(movie.image_url, timeout=10)
+        response.raise_for_status()
+        image = Image.open(io.BytesIO(response.content)).convert('RGBA')
+    except Exception:
+        # Fall back to the raw thumbnail if the fetch/decode fails for any
+        # reason, rather than erroring out the whole page/preview.
+        return HttpResponseRedirect(movie.image_url)
+
+    width, height = image.size
+    overlay = Image.new('RGBA', image.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+
+    radius = int(min(width, height) * 0.18)
+    cx, cy = width // 2, height // 2
+    draw.ellipse(
+        (cx - radius, cy - radius, cx + radius, cy + radius),
+        fill=(220, 38, 38, 235),
+    )
+
+    triangle_size = radius * 0.9
+    offset = triangle_size * 0.15  # nudge right so the triangle looks visually centered
+    draw.polygon(
+        [
+            (cx - triangle_size / 2 + offset, cy - triangle_size / 2),
+            (cx - triangle_size / 2 + offset, cy + triangle_size / 2),
+            (cx + triangle_size / 2 + offset, cy),
+        ],
+        fill=(255, 255, 255, 255),
+    )
+
+    composited = Image.alpha_composite(image, overlay).convert('RGB')
+    buffer = io.BytesIO()
+    composited.save(buffer, format='JPEG', quality=90)
+
+    resp = HttpResponse(buffer.getvalue(), content_type='image/jpeg')
+    resp['Cache-Control'] = 'public, max-age=86400'
+    return resp
+
 
 class AllCategoriesView(ListView):
     model = Category

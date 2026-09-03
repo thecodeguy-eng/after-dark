@@ -9,7 +9,7 @@
 
 {% block og_title %}{{ movie.title }} - After Dark{% endblock %}
 {% block og_description %}Watch {{ movie.title }} on After Dark. {{ movie.excerpt|truncatewords:20|default:"Premium adult entertainment content." }}{% endblock %}
-{% block og_image %}{{ movie.image_url }}{% endblock %}
+{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% url 'movies:movie_thumbnail' movie.id %}{% endblock %}
 
 {% block native_banner_footer %}{% endblock %}
 

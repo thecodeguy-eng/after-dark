@@ -21,4 +21,5 @@ urlpatterns = [
     path('api/video/<int:movie_id>/', views.get_video_data, name='get_video_data'),
     path('api/download/<int:movie_id>/', views.download_movie, name='download_movie'),
     path('api/resolve/<int:movie_id>/', views.resolve_video_source, name='resolve_video_source'),
+    path('thumb/<int:movie_id>/', views.movie_thumbnail_view, name='movie_thumbnail'),
 ]
