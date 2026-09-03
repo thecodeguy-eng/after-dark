@@ -85,7 +85,7 @@ def post_link(movie):
     # cut the caption off mid-HTML-tag and break the whole message.
     title = escape(movie.title[:150])
     text = (
-        f"🇳🇬 <b>{title}</b>\n\n"
+        f"🇳🇬 {title}\n\n"
         f"👇 <b>WATCH FULL VIDEO NOW</b> 👇\n<blockquote>{url}</blockquote>\n\n"
         f"{_vip_plug()}"
     )
@@ -126,7 +126,7 @@ def post_video(movie):
         )
 
     title = escape(movie.title[:150])
-    caption = f"🇳🇬 <b>{title}</b>\n\n{_vip_plug()}"
+    caption = f"🇳🇬 {title}\n\n{_vip_plug()}"
 
     with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as tmp:
         tmp_path = tmp.name
