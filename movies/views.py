@@ -9,8 +9,10 @@ from .models import Movie, Category, Tag, Series, Episode
 from .utils import resolve_xvideos_direct_urls, find_xvideos_embed_url
 import io
 import json
+import os
 import requests
 from PIL import Image, ImageDraw
+from django.conf import settings
 from django.template.loader import render_to_string
 
 def load_more_movies(request):
@@ -300,47 +302,65 @@ def movie_thumbnail_view(request, movie_id):
     Used as the detail page's og:image (see detail.html) so a plain-link
     Telegram post - or any other link-preview consumer - shows a proper
     "video card" look instead of the bare scraped thumbnail.
+
+    Generated once and cached to disk (movie_id doesn't change, so neither
+    does the composited result) - this endpoint gets hit repeatedly by
+    Telegram's link-preview crawler plus every pageview, and redoing the
+    fetch+decode+composite on every single request was heavy enough to help
+    OOM-kill the whole gunicorn process under load.
     """
     movie = get_object_or_404(Movie, id=movie_id)
     if not movie.image_url:
         return HttpResponse(status=404)
 
-    try:
-        response = requests.get(movie.image_url, timeout=10)
-        response.raise_for_status()
-        image = Image.open(io.BytesIO(response.content)).convert('RGBA')
-    except Exception:
-        # Fall back to the raw thumbnail if the fetch/decode fails for any
-        # reason, rather than erroring out the whole page/preview.
-        return HttpResponseRedirect(movie.image_url)
+    cache_dir = os.path.join(settings.MEDIA_ROOT, 'thumbs')
+    cache_path = os.path.join(cache_dir, f'{movie.id}.jpg')
 
-    width, height = image.size
-    overlay = Image.new('RGBA', image.size, (0, 0, 0, 0))
-    draw = ImageDraw.Draw(overlay)
+    if os.path.exists(cache_path):
+        with open(cache_path, 'rb') as f:
+            data = f.read()
+    else:
+        try:
+            response = requests.get(movie.image_url, timeout=10)
+            response.raise_for_status()
+            image = Image.open(io.BytesIO(response.content)).convert('RGBA')
+        except Exception:
+            # Fall back to the raw thumbnail if the fetch/decode fails for
+            # any reason, rather than erroring out the whole page/preview.
+            return HttpResponseRedirect(movie.image_url)
 
-    radius = int(min(width, height) * 0.18)
-    cx, cy = width // 2, height // 2
-    draw.ellipse(
-        (cx - radius, cy - radius, cx + radius, cy + radius),
-        fill=(220, 38, 38, 235),
-    )
+        width, height = image.size
+        overlay = Image.new('RGBA', image.size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(overlay)
 
-    triangle_size = radius * 0.9
-    offset = triangle_size * 0.15  # nudge right so the triangle looks visually centered
-    draw.polygon(
-        [
-            (cx - triangle_size / 2 + offset, cy - triangle_size / 2),
-            (cx - triangle_size / 2 + offset, cy + triangle_size / 2),
-            (cx + triangle_size / 2 + offset, cy),
-        ],
-        fill=(255, 255, 255, 255),
-    )
+        radius = int(min(width, height) * 0.18)
+        cx, cy = width // 2, height // 2
+        draw.ellipse(
+            (cx - radius, cy - radius, cx + radius, cy + radius),
+            fill=(220, 38, 38, 235),
+        )
 
-    composited = Image.alpha_composite(image, overlay).convert('RGB')
-    buffer = io.BytesIO()
-    composited.save(buffer, format='JPEG', quality=90)
+        triangle_size = radius * 0.9
+        offset = triangle_size * 0.15  # nudge right so the triangle looks visually centered
+        draw.polygon(
+            [
+                (cx - triangle_size / 2 + offset, cy - triangle_size / 2),
+                (cx - triangle_size / 2 + offset, cy + triangle_size / 2),
+                (cx + triangle_size / 2 + offset, cy),
+            ],
+            fill=(255, 255, 255, 255),
+        )
 
-    resp = HttpResponse(buffer.getvalue(), content_type='image/jpeg')
+        composited = Image.alpha_composite(image, overlay).convert('RGB')
+        buffer = io.BytesIO()
+        composited.save(buffer, format='JPEG', quality=90)
+        data = buffer.getvalue()
+
+        os.makedirs(cache_dir, exist_ok=True)
+        with open(cache_path, 'wb') as f:
+            f.write(data)
+
+    resp = HttpResponse(data, content_type='image/jpeg')
     resp['Cache-Control'] = 'public, max-age=86400'
     return resp
 

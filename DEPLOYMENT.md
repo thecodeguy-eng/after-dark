@@ -96,6 +96,10 @@ ExecStart=/var/www/after-dark/venv/bin/gunicorn \
     --workers 3 \
     --bind unix:/var/www/after-dark/afterdark.sock \
     bangxxx.wsgi:application
+# Without this, an OOM-kill (or any crash) leaves the site down until someone
+# notices and restarts it by hand - which is exactly what happened once.
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

@@ -139,13 +139,33 @@ def post_video(movie):
                     raise TelegramPostError('Video exceeded the size limit while downloading')
                 tmp.write(chunk)
 
+    # Telegram tries to auto-extract a poster frame from the video itself,
+    # which sometimes comes out blank/white for these resolved files. Passing
+    # our own thumbnail (same image used elsewhere on the site) guarantees a
+    # real poster instead of leaving it to that extraction.
+    thumb_bytes = None
+    if movie.image_url:
+        try:
+            thumb_response = requests.get(movie.image_url, timeout=10)
+            thumb_response.raise_for_status()
+            thumb_bytes = thumb_response.content
+        except Exception:
+            thumb_bytes = None
+
+    data = {
+        'chat_id': settings.TELEGRAM_CHANNEL_ID,
+        'caption': caption,
+        'parse_mode': 'HTML',
+        'supports_streaming': True,
+    }
+    if thumb_bytes:
+        data['thumbnail'] = 'attach://thumb'
+
     try:
         with open(tmp_path, 'rb') as f:
-            return _call('sendVideo', data={
-                'chat_id': settings.TELEGRAM_CHANNEL_ID,
-                'caption': caption,
-                'parse_mode': 'HTML',
-                'supports_streaming': True,
-            }, files={'video': f})
+            files = {'video': f}
+            if thumb_bytes:
+                files['thumb'] = ('thumb.jpg', thumb_bytes, 'image/jpeg')
+            return _call('sendVideo', data=data, files=files)
     finally:
         os.unlink(tmp_path)
