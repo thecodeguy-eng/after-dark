@@ -15,6 +15,7 @@ Both share the same VIP-channel/payment-DM plug (_vip_plug) - that's
 promotional, not a link back to the site, so it's not covered by the
 no-link-on-video rule.
 """
+import io
 import json
 import os
 import tempfile
@@ -22,6 +23,7 @@ from html import escape
 
 import requests
 from django.conf import settings
+from PIL import Image
 
 from .utils import find_xvideos_embed_url, resolve_xvideos_direct_urls
 
@@ -142,13 +144,20 @@ def post_video(movie):
     # Telegram tries to auto-extract a poster frame from the video itself,
     # which sometimes comes out blank/white for these resolved files. Passing
     # our own thumbnail (same image used elsewhere on the site) guarantees a
-    # real poster instead of leaving it to that extraction.
+    # real poster instead of leaving it to that extraction. Telegram silently
+    # ignores video thumbnails over 320px on a side or 200KB - our scraped
+    # thumbnails (600x337 etc.) are well over that, so it has to be resized
+    # down first or Telegram just drops it and falls back to blank/white.
     thumb_bytes = None
     if movie.image_url:
         try:
             thumb_response = requests.get(movie.image_url, timeout=10)
             thumb_response.raise_for_status()
-            thumb_bytes = thumb_response.content
+            thumb_image = Image.open(io.BytesIO(thumb_response.content)).convert('RGB')
+            thumb_image.thumbnail((320, 320))
+            thumb_buffer = io.BytesIO()
+            thumb_image.save(thumb_buffer, format='JPEG', quality=85)
+            thumb_bytes = thumb_buffer.getvalue()
         except Exception:
             thumb_bytes = None
 
