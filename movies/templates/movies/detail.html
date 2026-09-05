@@ -13,11 +13,11 @@
 
 {% block native_banner_footer %}{% endblock %}
 
-<!-- This page's own Adsterra account popunder (separate from the site-wide
-     default in base.html) - other formats from this same account get added
-     here too so they blend together. -->
+<!-- Monetag popunder here instead of Adsterra (the site-wide default) - this
+     is the highest-engagement page (users stay to watch, click watch/download/
+     related), so it gets the network we want the most popunder triggers on. -->
 {% block popunder_ad %}
-<script src="https://probationthimbledespite.com/a0/dc/bf/a0dcbf30a08bb887b271246a60cc8303.js"></script>
+<script>(function(s){s.dataset.zone='11721757',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 {% endblock %}
 
 {% block content %}
