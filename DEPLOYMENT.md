@@ -100,6 +100,9 @@ ExecStart=/var/www/after-dark/venv/bin/gunicorn \
 # notices and restarts it by hand - which is exactly what happened once.
 Restart=on-failure
 RestartSec=5
+# Headroom against any future file-descriptor leak (default is often 1024,
+# which a leaking connection pool can exhaust under real traffic).
+LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target
