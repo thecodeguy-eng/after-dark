@@ -23,16 +23,21 @@ def find_xvideos_embed_url(movie):
 def resolve_xvideos_direct_urls(embed_url, timeout=15):
     """Fetch an xvideos embedframe page and pull the signed direct video URLs
     (mp4 low/high quality and HLS) out of its inline html5player script."""
-    scraper = cloudscraper.create_scraper()
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Referer": "https://pornbox247.site/",
     }
 
-    response = scraper.get(embed_url, headers=headers, timeout=timeout)
-    response.raise_for_status()
-    html = response.text
+    # This runs inside the long-lived gunicorn worker on every video
+    # watch/download, so the scraper's session (and its connection pool)
+    # must be explicitly closed - cloudscraper.create_scraper() left
+    # unclosed here was leaking a file descriptor per call until the
+    # process hit the OS's open-file limit under real traffic.
+    with cloudscraper.create_scraper() as scraper:
+        response = scraper.get(embed_url, headers=headers, timeout=timeout)
+        response.raise_for_status()
+        html = response.text
 
     urls = {}
     for key, pattern in XVIDEOS_URL_PATTERNS.items():
