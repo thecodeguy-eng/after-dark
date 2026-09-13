@@ -10,6 +10,14 @@ from bs4 import BeautifulSoup
 
 BASE_URL = 'https://www.xvideos.com'
 
+# Categories excluded from a no-argument "scrape everything" run - not real
+# content matching the site's actual focus (Naija/Black content first, wider
+# net otherwise). AI is synthetic/fake video, not a real performer, and its
+# alphabetically-first position meant a single scrape run could burn its
+# entire --limit budget on nothing but AI-generated content before ever
+# reaching a real category.
+EXCLUDED_CATEGORY_NAMES = {'ai'}
+
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -145,8 +153,11 @@ class Command(BaseCommand):
             return
 
         print("🔎 No category given - discovering all categories to scrape everything...")
-        categories = fetch_all_categories(scraper)
-        print(f"📋 Found {len(categories)} categories.")
+        categories = [
+            (slug, name) for slug, name in fetch_all_categories(scraper)
+            if name.lower() not in EXCLUDED_CATEGORY_NAMES
+        ]
+        print(f"📋 Found {len(categories)} categories (after excluding {sorted(EXCLUDED_CATEGORY_NAMES)}).")
 
         for slug, name in categories:
             if self.limit is not None and self.created_count >= self.limit:
