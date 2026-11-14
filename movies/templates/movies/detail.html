@@ -13,12 +13,14 @@
 
 {% block native_banner_footer %}{% endblock %}
 
-<!-- Monetag popunder here instead of Adsterra (the site-wide default) - this
-     is the highest-engagement page (users stay to watch, click watch/download/
-     related), so it gets the network we want the most popunder triggers on. -->
+<!-- Detail page runs a single ad: this Monetag tag. Every other ad from
+     base.html (Adsterra popunder, 728x90 banner, native slots, social bar)
+     is blanked out below. -->
 {% block popunder_ad %}
-<script>(function(s){s.dataset.zone='11684420',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<script>(function(s){s.dataset.zone='11721757',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 {% endblock %}
+{% block banner_ad %}{% endblock %}
+{% block social_bar_ad %}{% endblock %}
 
 {% block content %}
 <div class="movie-detail-container">
@@ -150,17 +152,31 @@
         </div>
     </section>
     {% endif %}
-    <a href="https://omg10.com/4/9160518" target="_blank" rel="noopener" class="btn-watch-full-cta">
-        <i class="fas fa-download"></i>
+    <!-- Adsterra direct link on all three CTA buttons -->
+    <a href="https://apiguinee.org/4/8e6679469956434493b386af64d1dcfb" target="_blank" rel="noopener nofollow" class="btn-watch-full-cta">
+        <i class="fas fa-play"></i>
             Click Here To Watch Full Video
     </a>
 
     <br>
 
-     <a class="btn-download" href="https://www.profitableratecpmnetwork.com/cbid6fi0y?key=8e6679469956434493b386af64d1dcfb" target="_blank" rel="noopener">
+    <a href="https://apiguinee.org/4/8e6679469956434493b386af64d1dcfb" target="_blank" rel="noopener nofollow" class="btn-watch-full-cta btn-watch-faster">
+        <i class="fas fa-bolt"></i>
+            Watch Faster (HD Server)
+    </a>
+
+    <br>
+
+     <a class="btn-download" href="https://apiguinee.org/4/8e6679469956434493b386af64d1dcfb" target="_blank" rel="noopener nofollow">
         <i class="fas fa-download"></i>
             Click here to Download
     </a>
+
+    <!-- Adsterra native banner, after the watch/download buttons -->
+    <div class="ad-native-slot">
+        <script async="async" data-cfasync="false" src="https://biomanos.org/21/8bfcba54dca0af5ac3c26568d5732cf3"></script>
+                <div id="container-8bfcba54dca0af5ac3c26568d5732cf3"></div>
+    </div>
     
                     
     <!-- Movie Hero Section -->
@@ -259,13 +275,6 @@
                             <i class="fas fa-download"></i>
                             Click Here To Watch Full Video
                         </a> -->
-
-                        {% if movie.video_sources %}
-                        <div class="ad-native-slot">
-                            <script async="async" data-cfasync="false" src="https://pl31085306.profitableratecpmnetwork.com/8bfcba54dca0af5ac3c26568d5732cf3/invoke.js"></script>
-                            <div id="container-8bfcba54dca0af5ac3c26568d5732cf3"></div>
-                        </div>
-                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -725,6 +734,12 @@ function copyToClipboard() {
 
 .btn-watch-full-cta:hover {
     transform: translateY(-2px);
+}
+
+/* "Watch Faster" CTA - same direct link, amber so it reads as a separate option */
+.btn-watch-faster {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    animation-delay: 1.25s;
 }
 
 @keyframes watchFullPulse {

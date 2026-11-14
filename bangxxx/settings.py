@@ -51,7 +51,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Local dev (DEBUG) serves static files straight from disk; production uses
+# WhiteNoise's compressed/hashed storage, which requires `collectstatic`.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',  # MEDIA_ROOT on local disk
+    },
+    'staticfiles': {
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.StaticFilesStorage'
+            if DEBUG else
+            'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        ),
+    },
+}
 
 ROOT_URLCONF = 'bangxxx.urls'
 
@@ -74,18 +87,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'bangxxx.wsgi.application'
 
-# Database
+# Database - falls back to the local db.sqlite3 when DATABASE_URL is unset,
+# so production (which sets DATABASE_URL in .env) still uses Postgres.
 DATABASES = {
-    'default': dj_database_url.parse(config('DATABASE_URL')),
+    'default': dj_database_url.parse(
+        config('DATABASE_URL', default=f"sqlite:///{(BASE_DIR / 'db.sqlite3').as_posix()}")
+    ),
 }
-
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 
 # Password validation

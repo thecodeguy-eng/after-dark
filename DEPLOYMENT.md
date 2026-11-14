@@ -61,15 +61,14 @@ nano .env
 ```
 
 ```
-DATABASE_URL=<your Supabase connection string, after rotating the password>
-TELEGRAM_BOT_TOKEN=8754001303:AAGkZz3dt9283-fSHTz5ZBgi5OBjUjvahgs
+DATABASE_URL=postgresql://afterdark:<db-password>@127.0.0.1:5432/afterdark
+TELEGRAM_BOT_TOKEN=<token from @BotFather>
 TELEGRAM_CHANNEL_ID=-1002276869264
-SECRET_KEY=-er=!iv55!#$q6qgrrn_k73523w9bfx2dp8v0lfb!@j-6h*4bx
+SECRET_KEY=<generate: python -c "from django.core.management.utils import get_random_secret_key as g; print(g())">
 DEBUG=False
 ```
 
-That `SECRET_KEY` above was freshly generated for production use - don't
-reuse the one in your local dev `.env`.
+Never paste real secrets into this file - it's committed to git.
 
 ## 5. Migrate and collect static files
 
@@ -163,29 +162,19 @@ crontab -e
 ```
 
 ```cron
-# Scrape a fresh batch of xvideos categories nightly (pages 0-2 across all categories)
-0 3 * * * cd /var/www/after-dark && venv/bin/python manage.py scrape_xvideos 0 2 >> /var/log/afterdark-scrape.log 2>&1
+# Nightly scrape across all categories (AI excluded). Note: no positional
+# page args here - a bare number is read as a category slug and 404s.
+0 3 * * * cd /var/www/after-dark && venv/bin/python manage.py scrape_xvideos --limit 300 >> /var/log/afterdark-scrape.log 2>&1
 
-# Naija is the homepage's lead section, so it gets its own nightly search-based scrape
-30 3 * * * cd /var/www/after-dark && venv/bin/python manage.py scrape_xvideos --search naija --limit 24 >> /var/log/afterdark-scrape.log 2>&1
+# Naija is the homepage's lead section and the only thing posted to Telegram
+30 3 * * * cd /var/www/after-dark && venv/bin/python manage.py scrape_xvideos --search naija --limit 50 >> /var/log/afterdark-scrape.log 2>&1
 
-# 10 link posts + 5 video posts/day (15 total), evenly spaced every 96
-# minutes around the clock so posting doesn't cluster into a few hours.
-00 00 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-36 01 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-12 03 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type video >> /var/log/afterdark-telegram.log 2>&1
-48 04 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-24 06 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-00 08 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type video >> /var/log/afterdark-telegram.log 2>&1
-36 09 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-12 11 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-48 12 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type video >> /var/log/afterdark-telegram.log 2>&1
-24 14 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-00 16 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-36 17 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type video >> /var/log/afterdark-telegram.log 2>&1
-12 19 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-48 20 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link  >> /var/log/afterdark-telegram.log 2>&1
-24 22 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type video >> /var/log/afterdark-telegram.log 2>&1
+# Telegram: 5 Naija link posts/day, no videos, every 4h48m around the clock.
+00 00 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link >> /var/log/afterdark-telegram.log 2>&1
+48 04 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link >> /var/log/afterdark-telegram.log 2>&1
+36 09 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link >> /var/log/afterdark-telegram.log 2>&1
+24 14 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link >> /var/log/afterdark-telegram.log 2>&1
+12 19 * * * cd /var/www/after-dark && venv/bin/python manage.py post_telegram --type link >> /var/log/afterdark-telegram.log 2>&1
 ```
 
 ## 10. Deploying updates later

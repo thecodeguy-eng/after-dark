@@ -288,27 +288,25 @@
         margin-bottom: clamp(30px, 6vh, 50px);
     }
 
-    /* Featured grid breakpoints */
-    @media (min-width: 1200px) {
-        .featured-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+    /* Featured grid: compact cards - ~4 across on desktop, 3 on tablet,
+       2 on phones (was 2 huge full-width cards on desktop, 1 on smaller). */
+    .featured-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
     }
 
-    @media (min-width: 768px) and (max-width: 1199px) {
-        .featured-grid {
-            grid-template-columns: 1fr;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    @media (max-width: 1199px) {
+        .featured-grid { grid-template-columns: repeat(3, 1fr); }
     }
 
     @media (max-width: 767px) {
-        .featured-grid {
-            grid-template-columns: 1fr;
-        }
+        .featured-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     }
+
+    .featured-grid .featured-card { border-radius: 12px; }
+    .featured-grid .featured-title { font-size: 0.95rem; line-height: 1.3; }
+    .featured-grid .featured-meta { font-size: 0.75rem; }
+    .featured-grid .play-button-large { width: 48px; height: 48px; font-size: 1.1rem; }
 
     .featured-card {
         position: relative;
@@ -721,9 +719,6 @@
             gap: 20px;
         }
 
-        .featured-card {
-            aspect-ratio: 16/10;
-        }
 
         .slider-container {
             padding: 0 60px;

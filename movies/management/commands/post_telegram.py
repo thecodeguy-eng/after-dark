@@ -10,7 +10,7 @@ MAX_ATTEMPTS = 5
 class Command(BaseCommand):
     help = (
         'Post an unposted movie to the After Dark Telegram channel. '
-        'Run this from cron - 10x/day with --type link and 5x/day with --type video, '
+        'Run this from cron - 5x/day with --type link (Naija only), '
         'spread across the day (see DEPLOYMENT.md for the exact schedule).'
     )
 
@@ -23,18 +23,15 @@ class Command(BaseCommand):
 
         unposted = Movie.objects.filter(status='publish', telegram_posted_at__isnull=True)
 
-        # Prefer Naija-tagged content first so the channel skews mostly-Naija
-        # without excluding everything else - only fall back to the general
-        # pool once there's nothing unposted left in that category.
-        naija_candidates = list(
+        # The channel is Nigerian-only: post Naija-tagged content (from
+        # `scrape_xvideos --search naija`) and nothing else. No fallback to
+        # the general pool - if Naija runs out, skip the slot and scrape more.
+        candidates = list(
             unposted.filter(categories__name__icontains='naija').distinct().order_by('-date')[:MAX_ATTEMPTS]
         )
-        general_candidates = list(unposted.order_by('-date')[:MAX_ATTEMPTS])
-        candidates = naija_candidates + [m for m in general_candidates if m not in naija_candidates]
-        candidates = candidates[:MAX_ATTEMPTS]
 
         if not candidates:
-            self.stdout.write('No unposted movies available.')
+            self.stdout.write('No unposted Naija movies available - run: scrape_xvideos --search naija')
             return
 
         for movie in candidates:
